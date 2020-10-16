@@ -8,7 +8,20 @@
 <%@ page import="fr.univlyon1.m1if.m1if03.classes.User" %>
 <%@ page import="java.util.List" %>
 
-<%! private final GestionPassages passages = new GestionPassages(); %>
+<jsp:useBean id="passages" class="fr.univlyon1.m1if.m1if03.classes.GestionPassages"/>
+
+<%! //private final GestionPassages passages = new GestionPassages(); %>
+
+<%
+    /**
+     * Exercise 1.1: Check if a User isn't stored: then we redirect this one to the main page
+     */
+
+    if ((User) session.getAttribute("user") == null){
+        response.sendRedirect("index.html");
+    }
+
+%>
 
 <% if (request.getMethod().equals("POST")) { // Traitement du formulaire envoyé par saisie.html
 
@@ -30,10 +43,16 @@
     }
 } %>
 
+
+
+
 <!doctype html>
 <html>
 <head>
-    <title>Passages</title>
+    <title>
+        Passages |
+        <%= ((User) (session.getAttribute("user"))).getLogin() %>
+    </title>
 </head>
 <body>
 <h2>Hello <%= ((User) (session.getAttribute("user"))).getLogin() %> !</h2>
