@@ -50,8 +50,7 @@
 <html>
 <head>
     <title>
-        Passages |
-        <%= ((User) (session.getAttribute("user"))).getLogin() %>
+        Passages
     </title>
 </head>
 <body>
