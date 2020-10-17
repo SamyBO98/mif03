@@ -8,7 +8,7 @@
 <%@ page import="fr.univlyon1.m1if.m1if03.classes.User" %>
 <%@ page import="java.util.List" %>
 
-<jsp:useBean id="passages" class="fr.univlyon1.m1if.m1if03.classes.GestionPassages"/>
+<jsp:useBean id="passages" class="fr.univlyon1.m1if.m1if03.classes.GestionPassages" scope="application"/>
 
 <%! //private final GestionPassages passages = new GestionPassages(); %>
 
