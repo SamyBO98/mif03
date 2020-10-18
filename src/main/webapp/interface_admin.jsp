@@ -26,7 +26,7 @@
 <h2>Menu</h2>
 
 <a href="${pageContext.request.contextPath}/interface_admin.jsp?page=user.jsp">Informations sur l'utilisateur</a>
-<a href="${pageContext.request.contextPath}/interface_admin.jsp?page=passage_admin.jsp">Liste de tout les passages</a>
+<a href="${pageContext.request.contextPath}/interface_admin.jsp?page=passage.jsp">Liste de tout les passages</a>
 
 <!-- Routeurs: includes -->
 <c:choose>
