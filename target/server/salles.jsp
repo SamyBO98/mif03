@@ -11,12 +11,6 @@
 
 <jsp:useBean id="passages" class="fr.univlyon1.m1if.m1if03.classes.GestionPassages" scope="application"/>
 
-<html>
-<head>
-    <title>Liste de passages</title>
-</head>
-<body>
-
     <table>
         <tr>
             <th>Login</th>
@@ -41,5 +35,3 @@
         </c:forEach>
     </table>
 
-</body>
-</html>

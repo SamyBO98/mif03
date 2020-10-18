@@ -10,12 +10,6 @@
     User u = (User) session.getAttribute("user");
 %>
 
-<html>
-<head>
-    <title>Liste de passages</title>
-</head>
-<body>
-
 <table>
     <tr>
         <th>Login</th>
@@ -29,6 +23,4 @@
 
 </table>
 
-</body>
-</html>
 

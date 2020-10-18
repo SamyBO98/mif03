@@ -2,7 +2,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="fr.univlyon1.m1if.m1if03.classes.Passage" %>
-<%@ page import="fr.univlyon1.m1if.m1if03.classes.GestionPassages" %>
 <%@ page import="fr.univlyon1.m1if.m1if03.classes.Salle" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="fr.univlyon1.m1if.m1if03.classes.User" %>
@@ -10,15 +9,14 @@
 
 <jsp:useBean id="passages" class="fr.univlyon1.m1if.m1if03.classes.GestionPassages" scope="application"/>
 
-<%! //private final GestionPassages passages = new GestionPassages(); %>
-
 <%
     /**
      * Exercise 1.1: Check if a User isn't stored: then we redirect this one to the main page
      */
 
-    if ((User) session.getAttribute("user") == null){
+    if (session.getAttribute("user") == null){
         response.sendRedirect("index.html");
+        return;
     }
 
 %>
@@ -41,19 +39,9 @@
             p.setSortie(new Date());
         }
     }
+
 } %>
 
-
-
-
-<!doctype html>
-<html>
-<head>
-    <title>
-        Passages
-    </title>
-</head>
-<body>
 <h2>Hello <%= ((User) (session.getAttribute("user"))).getLogin() %> !</h2>
 
 <% List<Passage> passagesAffiches = null; %>
@@ -92,8 +80,3 @@
     </c:forEach>
 </table>
 
-<p><a href="saisie.html">Saisir un nouveau passage</a></p>
-<p><a href="Deco">Se déconnecter</a></p>
-
-</body>
-</html>

@@ -8,14 +8,7 @@
 
 <%
     User u = (User) session.getAttribute("user");
-    System.out.println(u.getLogin());
 %>
-
-<html>
-<head>
-    <title>Liste de passages</title>
-</head>
-<body>
 
 <table>
     <tr>
@@ -30,6 +23,4 @@
 
 </table>
 
-</body>
-</html>
 
