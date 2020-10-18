@@ -8,6 +8,14 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
+<%
+    if (session.getAttribute("admin") != null){
+        if ((Boolean) request.getSession().getAttribute("admin")){
+            response.sendRedirect("interface_admin.jsp");
+        }
+    }
+%>
+
 <html>
 <head>
     <title>Menu</title>

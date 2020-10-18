@@ -13,6 +13,7 @@
     /**
      * Exercise 1.1: Check if a User isn't stored: then we redirect this one to the main page
      */
+
     if (session.getAttribute("user") == null){
         response.sendRedirect("index.html");
         return;
@@ -45,9 +46,9 @@
 
 <% List<Passage> passagesAffiches = null; %>
 
-<c:if test="${!sessionScope.admin}">
-    <h1>Liste de vos passages</h1>
-    <% passagesAffiches = passages.getPassagesByUser((User) session.getAttribute("user")); %>
+<c:if test="${sessionScope.admin}">
+    <h1>Liste de tous les passages</h1>
+    <% passagesAffiches = passages.getAllPassages(); %>
 </c:if>
 
 <table>
