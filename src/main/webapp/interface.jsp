@@ -9,9 +9,20 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
+
+    /**
+     * Redirige l'utilisateur à la bonne interface
+     * NB: On récupère les URL afin de ne pas avoir de petits soucis (pas grves du tout mais servent au site à rester efficace)
+     */
     if (session.getAttribute("admin") != null){
         if ((Boolean) request.getSession().getAttribute("admin")){
-            response.sendRedirect("interface_admin.jsp");
+            if (request.getParameter("user") != null){
+                response.sendRedirect("interface_admin.jsp?user=" + request.getParameter("user"));
+            } else if (request.getParameter("room") != null){
+                response.sendRedirect("interface_admin.jsp?room=" + request.getParameter("room"));
+            } else {
+                response.sendRedirect("interface_admin.jsp");
+            }
         }
     }
 %>
@@ -34,7 +45,11 @@
             <jsp:include page="/${ param.page }"/>
         </c:when>
 
-        <c:when test="${ pageContext.request.method == 'POST' }">
+        <c:when test="${ pageContext.request.getParameter(\"saisie_done\") != null }">
+            <jsp:include page="/${ pageContext.request.getParameter(\"saisie_done\") }"/>
+        </c:when>
+
+        <c:when test="${ param.user != null || param.room != null }">
             <jsp:include page="/passage.jsp"/>
         </c:when>
 

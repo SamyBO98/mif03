@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Passages par utilisateur ou par salle</title>
+</head>
+<body>
+    <h1>Formulaire de passages par utilisateur ou par salles</h1>
+    <form action="interface_admin.jsp" method="post">
+        <label>
+            Entrez le nom d'utilisateur/ la salle
+            <input type="text" name="textUserRoom">
+        </label>
+        <label>
+            Est-ce un utilisateur ou une salle que vous recherchez?
+            <select name="userRoom">
+                <option value="user" selected>Utilisateur</option>
+                <option value="room">Salle</option>
+            </select>
+        </label>
+
+        <input type="submit" value="Valider ma recherche" name="button">
+        <input type="hidden" value="passage.jsp" name="saisie_done">
+    </form>
+</body>
+</html>
