@@ -60,5 +60,6 @@
 
     <p><a href="saisie.html">Saisir un nouveau passage</a></p>
     <p><a href="Deco">Se déconnecter</a></p>
+    <p><a href="SameRoom.html">Search user</a></p>
 </body>
 </html>
