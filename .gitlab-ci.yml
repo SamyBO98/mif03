@@ -1,0 +1,13 @@
+variables:
+  CI_SSH_KEY: "./gitlabci.pem"
+
+junit:
+  image: maven:3.6.1-jdk-11 # docker image with Maven
+  before_script:
+    - . setup-mvn-proxy.sh
+    - chmod 400 $CI_SSH_KEY
+  script:
+    - mvn install
+    - mvn test
+    - mvn compile
+    - scp -o StrictHostKeyChecking=no -i $CI_SSH_KEY /target/server.war gitlabci@192.168.75.98:/opt/tomcat/webapps/v1.war
