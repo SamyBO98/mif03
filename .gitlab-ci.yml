@@ -10,5 +10,5 @@ junit:
     - mvn install
     - mvn test
     - mvn compile
-    - ls target
+    - ls /builds
     - scp -o StrictHostKeyChecking=no -i $CI_SSH_KEY /builds/tp2/server.war gitlabci@192.168.75.98:/opt/tomcat/webapps/v1.war
