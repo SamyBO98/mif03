@@ -1,0 +1,20 @@
+1.5 Amélioration des fonctionnalités
+
+Pour le passage par utilisateur et par salle on utilise le formulaire passages.html qui nous donne le choix entre la recherche d'une salle et la recherche d'un 
+utilisateur. Toutes les données du formulaire sont envoyées par la méthode post à la page interface_admin.jsp
+Nous avons aussi décidé de créer une nouvelle page jsp appelée passageUtilisateurSalle.jsp 
+Cette page permet d'afficher une liste de passages selon le formulaire de passages.html: une salle ou un utilisateur
+
+Pour savoir quels utilisateurs étaient dans la même salle, nous avons opté pour un formulaire (SameRoom.html) afin de pouvoir saisir un utilisateur. Ce formulaire va, par 
+la méthode post, envoyer les données à une nouvelle page jsp appelée SearchUser.jsp
+On utilise donc ici deux listes de passage et une liste de String UtilisateursRisky. La première liste de passage désigne les salles dans lesquels notre utilisateur est rentré.
+La deuxième liste nous permet de récupérer le passage par salle et par date.
+On parcourt cette deuxième liste puis on test pour notre utilisateur s'il est entré en contact avec une personne à risque. Si oui alors la personne avec lequel il est entré 
+en contact est ajouté à la liste UtilisateursRisky.
+On les affiche à l'écran avec un foreach
+
+Pour la notion de capacité maximale d'une salle, nous avons un autre formulaire (capacite_salle.html) afin de pouvoir stocker
+une salle et sa capacité. Nous mettons cela dans une hashmap avec la méthode put. A chaque fois qu'onaffiche la liste des passages on récupère chaque liste.
+A l'aide de notre fonction capacityResultString qui prend en paramètre un nom de salle on récupère la capacité max stockée dans le put à l'aide du nom de la salle.
+On peut donc stocker le nombre de personnes qui rentrent, sans sortir, dans la salle. Si cette valeur est supérieur ou égale à la capacité maximale alors la capacité est 
+saturée. Si quelqu'un sort alors il crée forcément une date de sortie et cette personne n'est donc plus prise en compte.
