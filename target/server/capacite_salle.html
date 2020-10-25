@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capacité d'une salle</title>
+</head>
+<body>
+<h1>Capacité d'une salle</h1>
+<p>Indiquez le nom d'une salle et mettez sa capacité maximum.<br/>
+    Vous serez notifié dans la liste des passages lorsqu'une salle est saturée.</p>
+<form method="post" action="interface_admin.jsp">
+    <p>
+        <label>
+            Nom de la salle :
+            <input type="text" name="capacite_salle">
+        </label>
+        <label>
+            Capacité maximum :
+            <input id="number" type="number" value="20" name="capacite_max">
+        </label>
+    </p>
+    <p>
+        <input type="submit" value="Valider" name="submit">
+        <input type="hidden" value="passage.jsp" name="saisie_done">
+    </p>
+</form>
+<p><a href="Deco">Déconnexion</a></p>
+</body>
+</html>

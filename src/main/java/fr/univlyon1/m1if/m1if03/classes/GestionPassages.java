@@ -2,13 +2,41 @@ package fr.univlyon1.m1if.m1if03.classes;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class GestionPassages {
+
+    private HashMap<String, Integer> salles = new HashMap<>();
+
     private final List<Passage> passages = new ArrayList<>();
 
     public void add(Passage passage) {
         this.passages.add(passage);
+    }
+
+    public void editCapacity(String room, int capacity) {
+        this.salles.put(room, capacity);
+    }
+
+    public String capacityResultString(String room) {
+        if (salles.containsKey(room)){
+            int res = 0;
+            for (int i = 0; i < passages.size(); i++){
+                if (passages.get(i).getSortie() == null){
+                    res ++;
+                }
+            }
+
+            if (res >= salles.get(room)){
+                return "Capacité maximum atteinte";
+            } else {
+                return "Non saturée";
+            }
+
+        } else {
+            return "Non enregistré";
+        }
     }
 
     /**

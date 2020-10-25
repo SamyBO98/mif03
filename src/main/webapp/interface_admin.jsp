@@ -56,6 +56,7 @@
     <p><a href="cherche_utilisateur.html">Rechercher un utilisateur</a></p>
     <p><a href="passages.html">Passages selon un utilisateur ou une salle</a></p>
     <p><a href="saisie.html">Saisir un nouveau passage</a></p>
+    <p><a href="capacite_salle.html">Définir une capacité max d'une salle</a></p>
     <p><a href="SameRoom.html">Search user</a></p>
     <p><a href="Deco">Se déconnecter</a></p>
 </body>

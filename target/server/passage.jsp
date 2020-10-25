@@ -23,6 +23,11 @@
 <%
     List<Passage> passageList;
 
+    //from capacite_salle.html
+    if ((request.getParameter("capacite_salle") != null) && (request.getParameter("capacite_max") != null)) {
+        passages.editCapacity(request.getParameter("capacite_salle"), Integer.parseInt(request.getParameter("capacite_max")));
+    }
+
         if ((request.getParameter("user") != null) || (request.getParameter("room") != null)){
             System.out.println("ON EST BONS!");
             //From clicking a link (user / room)
@@ -86,6 +91,9 @@
         <th>Salle</th>
         <th>Entrée</th>
         <th>Sortie</th>
+        <c:if test="${ sessionScope.admin == true }">
+            <th>Capacité</th>
+        </c:if>
     </tr>
 
     <c:forEach items="${sessionScope.passageList}" var="passage">
@@ -108,6 +116,11 @@
                 <fmt:formatDate value="${passage.sortie}" var="heureSortie" type="time" />
                     ${heureSortie}
             </td>
+            <c:if test="${ sessionScope.admin == true }">
+                <td>
+                    <c:out value="${passages.capacityResultString(passage.salle.nom)}"></c:out>
+                </td>
+            </c:if>
         </tr>
     </c:forEach>
 </table>
