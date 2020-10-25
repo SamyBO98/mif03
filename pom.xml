@@ -9,8 +9,8 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>mifprojet gp7 webapp</name>
-  <url>http://192.168.74.206:8080/</url>
+  <name>mif03 </name>
+  <url>http://192.168.75.98:8080/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
