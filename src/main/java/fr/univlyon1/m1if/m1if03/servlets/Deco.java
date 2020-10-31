@@ -10,6 +10,7 @@ import java.io.IOException;
 @WebServlet(name = "Deco", urlPatterns = "/Deco")
 public class Deco extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("Log Out");
         request.getSession().invalidate();
         response.sendRedirect("./");
     }

@@ -19,6 +19,8 @@ public class AdminFilter extends HttpFilter implements Filter {
 
         User user = (User) session.getAttribute("user");
 
+        System.out.println("Admin Filter");
+
         if (user.getAdmin()){
             chain.doFilter(request, response);
         } else {

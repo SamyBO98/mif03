@@ -17,16 +17,13 @@ import java.util.HashMap;
 @WebServlet(name = "Init", urlPatterns = "/Init", loadOnStartup = 1)
 public class Init extends HttpServlet {
 
-
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.sendRedirect("index.jsp");
-    }
-
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         config.getServletContext().setAttribute("passages", new GestionPassages());
         config.getServletContext().setAttribute("salles", new HashMap<String, Salle>());
         config.getServletContext().setAttribute("users", new HashMap<String, User>());
+
+        System.out.println("Initialisation successfull");
     }
 }
