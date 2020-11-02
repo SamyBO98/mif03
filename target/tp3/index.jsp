@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="static/presence.css">
 </head>
 <body>
-<jsp:include page="composants/header.jsp"/>
+<jsp:include page="WEB-INF/composants/header.jsp"/>
 
 <main id="contenu" class="wrapper">
     <aside class="menu"></aside>
@@ -39,6 +39,6 @@
     </article>
 </main>
 
-<jsp:include page="composants/footer.html"/>
+<jsp:include page="WEB-INF/composants/footer.html"/>
 </body>
 </html>

@@ -2,12 +2,10 @@
  "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
-<web-app
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="http://java.sun.com/xml/ns/javaee"
-        xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-        version="3.0">
+<web-app version="4.0"
+         xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
   <display-name>Archetype Created Web Application</display-name>
   <!-- Filter for Authentificate class -->
   <filter>
@@ -16,7 +14,7 @@
   </filter>
   <filter-mapping>
     <filter-name>authentificate</filter-name>
-    <url-pattern>/interface*</url-pattern>
+    <url-pattern>/presence*</url-pattern>
   </filter-mapping>
 
   <!-- Filter for AdminFilter class -->
@@ -26,6 +24,6 @@
   </filter>
   <filter-mapping>
     <filter-name>admin</filter-name>
-    <url-pattern>/interface_admin*</url-pattern>
+    <url-pattern>/admin*</url-pattern>
   </filter-mapping>
 </web-app>
