@@ -83,6 +83,7 @@ public class Admin extends HttpServlet {
                             ((Map<String, User>)context.getAttribute("users")).get(req.getParameter("login"))
                     );
                 } else {
+                    System.out.println("On affiche les passages");
                     passages = ((GestionPassages)context.getAttribute("passages")).getAllPassages();
                 }
 

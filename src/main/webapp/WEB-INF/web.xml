@@ -37,4 +37,13 @@
     <url-pattern>/presence*</url-pattern>
   </filter-mapping>
 
+  <filter>
+    <filter-name>etags</filter-name>
+    <filter-class>fr.univlyon1.m1if.m1if03.servlets.CacheETags</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>etags</filter-name>
+    <url-pattern>/presence</url-pattern>
+  </filter-mapping>
+
 </web-app>

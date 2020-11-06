@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="static/presence.css">
 </head>
 <body>
+<meta http-equiv="refresh" content="5" />
 <jsp:include page="composants/header.jsp"/>
 
 <main class="wrapper">
