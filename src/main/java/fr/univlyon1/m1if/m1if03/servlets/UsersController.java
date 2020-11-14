@@ -35,10 +35,15 @@ public class UsersController extends HttpServlet {
             /**
              * Récupère la liste des utilisateurs
              */
+            req.setAttribute("users", users);
+
         } else if (uri.size() == 2){
             /**
              * Récupère un utilisateur
              */
+            String login = uri.get(1);
+            req.setAttribute("user", users.get(login));
+
         } else if (uri.size() == 3){
             if (uri.get(2).equals("passages")){
                 /**
@@ -57,6 +62,10 @@ public class UsersController extends HttpServlet {
                 /**
                  * Met à jour le nom d'un utilisateur
                  */
+                String login = uri.get(1);
+                String name = (String) req.getAttribute("name"); // A modifier
+                users.get(login).setNom(name);
+
             }
         }
     }
@@ -114,22 +123,5 @@ public class UsersController extends HttpServlet {
         System.out.println(res);
 
         return res;
-    }
-
-    /**
-     * Private function: get all users.
-     * @return users collection.
-     */
-    private Map<String, User> getUsers(){
-        return this.users;
-    }
-
-    /**
-     * Private function: get single user.
-     * @param login name of the login.
-     * @return single user.
-     */
-    private User getUser(String login){
-        return this.users.get(login);
     }
 }

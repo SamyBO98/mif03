@@ -25,7 +25,7 @@
     <url-pattern>/admin</url-pattern>
     <url-pattern>/passages*</url-pattern>
     <url-pattern>/users*</url-pattern>
-    <url-pattern>/rooms*</url-pattern>
+    <url-pattern>/salles*</url-pattern>
   </filter-mapping>
 
   <filter>
@@ -36,6 +36,13 @@
     <filter-name>Authorization</filter-name>
     <url-pattern>/admin</url-pattern>
   </filter-mapping>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Authentication</web-resource-name>
+      <url-pattern>/users/login</url-pattern>
+    </web-resource-collection>
+  </security-constraint>
 
   <filter>
     <filter-name>CorsFilter</filter-name>

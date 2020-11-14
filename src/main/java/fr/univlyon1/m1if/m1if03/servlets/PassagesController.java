@@ -1,6 +1,9 @@
 package fr.univlyon1.m1if.m1if03.servlets;
 
 import fr.univlyon1.m1if.m1if03.classes.GestionPassages;
+import fr.univlyon1.m1if.m1if03.classes.Passage;
+import fr.univlyon1.m1if.m1if03.classes.Salle;
+import fr.univlyon1.m1if.m1if03.classes.User;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -10,9 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @WebServlet(name = "PassagesController",
         urlPatterns = {
@@ -37,35 +40,53 @@ public class PassagesController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> uri = parseUri(req.getRequestURI(), "passages");
+        List<Passage> passagesAffiches = null;
 
         if (uri.size() == 1){
             /**
              * Récupére la liste complète de tout les passages
              */
+            passagesAffiches = passages.getAllPassages();
+
         } else if (uri.size() == 2){
             /**
              * Récupère un passage en particulier
              */
+            int id = Integer.parseInt(uri.get(1));
+            passagesAffiches = (List<Passage>) passages.getPassageById(id);
+
         } else if (uri.size() == 3){
             if (uri.get(1).equals("byUser")){
                 /**
                  * Récupérer la liste des passages d'un utilisateur
                  */
+                String login = uri.get(2);
+                passagesAffiches = passages.getPassagesByUser(new User(login));
+
             } else if (uri.get(1).equals("bySalle")){
                 /**
                  * Récupère la liste des passages dans une salle
                  */
+                String room = uri.get(2);
+                passagesAffiches = passages.getPassagesBySalle(new Salle(room));
             }
         } else if (uri.size() == 4){
             if (uri.get(1).equals("byUser") && uri.get(3).equals("enCours")){
                 /**
                  * Récupérer la liste des passages en cours d'un utilisateur
                  */
+                String login = uri.get(2);
+                passagesAffiches = passages.getPassagesByUserEncours(new User(login));
+
             } else if (uri.get(1).equals("byUserAndSalle")){
                 /**
                  * Récupère la liste des pasages d'un utilisateur
                  * dans une salle
                  */
+                String login = uri.get(2);
+                String room = uri.get(3);
+                passagesAffiches = passages.getPassagesByUserAndSalle(new User(login), new Salle(room));
+
             }
         } else if (uri.size() == 5){
             if (uri.get(1).equals("byUserAndDates")){
@@ -73,11 +94,32 @@ public class PassagesController extends HttpServlet {
                  * Récupère la liste des passages d'un utilisateur
                  * entre 2 dates
                  */
+                try {
+                    String login = uri.get(2);
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"));
+                    Date dateEntree = sdf.parse(uri.get(3));
+                    Date dateSortie = sdf.parse(uri.get(4));
+                    passagesAffiches = passages.getPassagesByUserAndDates(new User(login), dateEntree, dateSortie);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+
             } else if (uri.get(1).equals("bySalleAndDates")){
                 /**
                  * Récupère la liste des passages dans une salle
                  * entre 2 dates
                  */
+                try {
+                    String room = uri.get(2);
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"));
+                    Date dateEntree = sdf.parse(uri.get(3));
+                    Date dateSortie = sdf.parse(uri.get(4));
+                    passagesAffiches = passages.getPassagesBySalleAndDates(new Salle(room), dateEntree, dateSortie);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
             }
         }
     }

@@ -35,10 +35,15 @@ public class RoomsController extends HttpServlet {
             /**
              * Retourner toutes les salles
              */
+            req.setAttribute("salles", salles);
+
         } else if (uri.size() == 2){
             /**
              * Récupérer une salle en particulier
              */
+            String room = uri.get(1);
+            req.setAttribute("salle", salles.get(room));
+
         } else if (uri.size() == 3){
             if (uri.get(2).equals("passages")){
                 /**
@@ -117,50 +122,5 @@ public class RoomsController extends HttpServlet {
         System.out.println(res);
 
         return res;
-    }
-
-    /**
-     * Private function: get all rooms.
-     * @return rooms collection.
-     */
-    private Map<String, Salle> getRooms(){
-        return this.salles;
-    }
-
-    /**
-     * Private function: get single room.
-     * @param room name of the room.
-     * @return single room.
-     */
-    private Salle getRoom(String room){
-        return this.salles.get(room);
-    }
-
-    /**
-     * Private function: add single rooms if not exists.
-     * @param room name of the room.
-     */
-    private void addRoom(String room){
-        if (getRoom(room) == null){
-            this.salles.put(room, new Salle(room));
-        }
-    }
-
-    /**
-     *
-     * @param room
-     */
-    private void editRoom(String room){
-
-    }
-
-    /**
-     * Private function: delete room if exists.
-     * @param room name of the room.
-     */
-    private void deleteRoom(String room){
-        if (getRoom(room) != null){
-            this.salles.remove(room);
-        }
     }
 }
