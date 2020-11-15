@@ -45,12 +45,19 @@ public class PassagesController extends HttpServlet {
         if (uri.size() == 1){
             /**
              * Récupére la liste complète de tout les passages
+             * 200:OK
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
              */
             passagesAffiches = passages.getAllPassages();
 
         } else if (uri.size() == 2){
             /**
              * Récupère un passage en particulier
+             * 200: OK
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
+             * 404: passage non trouvé
              */
             int id = Integer.parseInt(uri.get(1));
             passagesAffiches = (List<Passage>) passages.getPassageById(id);
@@ -59,6 +66,10 @@ public class PassagesController extends HttpServlet {
             if (uri.get(1).equals("byUser")){
                 /**
                  * Récupérer la liste des passages d'un utilisateur
+                 * 200: OK
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
+                 * 404: utilisateur non trouvé
                  */
                 String login = uri.get(2);
                 passagesAffiches = passages.getPassagesByUser(new User(login));
@@ -66,6 +77,10 @@ public class PassagesController extends HttpServlet {
             } else if (uri.get(1).equals("bySalle")){
                 /**
                  * Récupère la liste des passages dans une salle
+                 * 200: OK
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
+                 * 404: salle non trouvé
                  */
                 String room = uri.get(2);
                 passagesAffiches = passages.getPassagesBySalle(new Salle(room));
@@ -74,6 +89,10 @@ public class PassagesController extends HttpServlet {
             if (uri.get(1).equals("byUser") && uri.get(3).equals("enCours")){
                 /**
                  * Récupérer la liste des passages en cours d'un utilisateur
+                 * 200: OK
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
+                 * 404: utilisateur non trouvé
                  */
                 String login = uri.get(2);
                 passagesAffiches = passages.getPassagesByUserEncours(new User(login));
@@ -82,6 +101,10 @@ public class PassagesController extends HttpServlet {
                 /**
                  * Récupère la liste des pasages d'un utilisateur
                  * dans une salle
+                 * 200: OK
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
+                 * 404: utilisateur ou salle non trouvé
                  */
                 String login = uri.get(2);
                 String room = uri.get(3);
@@ -93,6 +116,10 @@ public class PassagesController extends HttpServlet {
                 /**
                  * Récupère la liste des passages d'un utilisateur
                  * entre 2 dates
+                 * 200: OK
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
+                 * 404: utilisateur non trouvé
                  */
                 try {
                     String login = uri.get(2);
@@ -109,6 +136,10 @@ public class PassagesController extends HttpServlet {
                 /**
                  * Récupère la liste des passages dans une salle
                  * entre 2 dates
+                 * 200: OK
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
+                 * 404: salle non trouvé
                  */
                 try {
                     String room = uri.get(2);
@@ -131,6 +162,9 @@ public class PassagesController extends HttpServlet {
         if (uri.size() == 1){
             /**
              * Création d'un passage
+             * 201: OK
+             * 400: paramètres de requête non acceptable
+             * 401: utilisateur non authentifié
              */
         }
     }

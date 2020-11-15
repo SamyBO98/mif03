@@ -34,12 +34,19 @@ public class UsersController extends HttpServlet {
         if (uri.size() == 1){
             /**
              * Récupère la liste des utilisateurs
+             * 200: OK
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
              */
             req.setAttribute("users", users);
 
         } else if (uri.size() == 2){
             /**
              * Récupère un utilisateur
+             * 200: OK
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur (si l'utilisateur n'est pas celui qui est logué)
+             * 404: utilisateur non trouvé
              */
             String login = uri.get(1);
             req.setAttribute("user", users.get(login));
@@ -48,6 +55,9 @@ public class UsersController extends HttpServlet {
             if (uri.get(2).equals("passages")){
                 /**
                  * Récupère la liste des passages d'un utilisateur
+                 * 303: redirection vers l'URL de la liste des passages de cet utilisateur
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
                  */
             }
         }
@@ -61,6 +71,11 @@ public class UsersController extends HttpServlet {
             if (uri.get(2).equals("nom")){
                 /**
                  * Met à jour le nom d'un utilisateur
+                 * 204: OK
+                 * 400: paramètres de requêtes non acceptable
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
+                 * 404: utilisateur non trouvé
                  */
                 String login = uri.get(1);
                 String name = (String) req.getAttribute("name"); // A modifier
@@ -78,10 +93,14 @@ public class UsersController extends HttpServlet {
             if (uri.get(1).equals("login")){
                 /**
                  * Connecte l'utilisateur
+                 * 204: OK
+                 * 400: paramètres de requêtes non acceptable
                  */
             } else if (uri.get(1).equals("logout")){
                 /**
                  * Déconnecte l'utilisateur
+                 * 204: OK
+                 * 400: paramètres de requêtes non acceptable
                  */
             }
         }

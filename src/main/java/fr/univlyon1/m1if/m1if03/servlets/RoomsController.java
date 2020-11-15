@@ -34,12 +34,19 @@ public class RoomsController extends HttpServlet {
         if (uri.size() == 1){
             /**
              * Retourner toutes les salles
+             * 200: OK
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
              */
             req.setAttribute("salles", salles);
 
         } else if (uri.size() == 2){
             /**
              * Récupérer une salle en particulier
+             * 200: OK
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
+             * 404: salle non trouvée
              */
             String room = uri.get(1);
             req.setAttribute("salle", salles.get(room));
@@ -48,6 +55,9 @@ public class RoomsController extends HttpServlet {
             if (uri.get(2).equals("passages")){
                 /**
                  * Récupérer la liste des passages dans une salle
+                 * 303: redirection vers l'URL de la liste des passages dans la salle
+                 * 401: utilisateur non authentifié
+                 * 403: utilisateur non administrateur
                  */
             }
         }
@@ -60,6 +70,10 @@ public class RoomsController extends HttpServlet {
         if (uri.size() == 2){
             /**
              * Mettre à jour ou création d'une salle
+             * 204: OK
+             * 400: paramètres de requête non acceptables
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
              */
         }
     }
@@ -71,6 +85,10 @@ public class RoomsController extends HttpServlet {
         if (uri.size() == 2){
             /**
              * Supprimer une salle en particulier
+             * 204: OK
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
+             * 404: salle non trouvée
              */
         }
     }
@@ -82,6 +100,10 @@ public class RoomsController extends HttpServlet {
         if (uri.size() == 1){
             /**
              * Création d'une salle
+             * 201: OK
+             * 400: paramètres de requête non acceptable
+             * 401: utilisateur non authentifié
+             * 403: utilisateur non administrateur
              */
         }
     }
