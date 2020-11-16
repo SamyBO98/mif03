@@ -1,6 +1,7 @@
 package fr.univlyon1.m1if.m1if03.servlets;
 
 import fr.univlyon1.m1if.m1if03.classes.Salle;
+import fr.univlyon1.m1if.m1if03.classes.User;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name = "RoomsController", urlPatterns = {"/salles", "/salles/*", "/salles/*/passages"})
+@WebServlet(name = "RoomsController", urlPatterns = {"/salles", "/salles/*"})
 public class RoomsController extends HttpServlet {
 
     private Map<String, Salle> salles;
@@ -39,6 +40,7 @@ public class RoomsController extends HttpServlet {
              * 403: utilisateur non administrateur
              */
             req.setAttribute("salles", salles);
+            resp.setStatus(200);
 
         } else if (uri.size() == 2){
             /**
@@ -48,8 +50,19 @@ public class RoomsController extends HttpServlet {
              * 403: utilisateur non administrateur
              * 404: salle non trouvée
              */
+            if (req.getSession(true).getAttribute("user") == null){
+                resp.sendError(401);
+                return;
+            } else if (!((User)req.getSession(true).getAttribute("user")).getAdmin()){
+                resp.sendError(403);
+                return;
+            } else if (salles.get(uri.get(1)) == null){
+                resp.sendError(404);
+                return;
+            }
             String room = uri.get(1);
             req.setAttribute("salle", salles.get(room));
+            resp.setStatus(200);
 
         } else if (uri.size() == 3){
             if (uri.get(2).equals("passages")){
@@ -105,7 +118,16 @@ public class RoomsController extends HttpServlet {
              * 401: utilisateur non authentifié
              * 403: utilisateur non administrateur
              */
+            String room = req.getParameter("nomSalle");
+            if (room == null || room.equals("")){
+                resp.sendError(400);
+                return;
+            }
+
+            salles.put(room, new Salle(room));
         }
+
+
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

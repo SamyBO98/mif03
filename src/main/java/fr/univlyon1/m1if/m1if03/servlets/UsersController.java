@@ -9,13 +9,15 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name = "UsersController", urlPatterns = {"/users", "/users/*", "/users/*/nom", "/users/*/passages", "/users/login", "/users/logout"})
+@WebServlet(name = "UsersController", urlPatterns = {"/users", "/users/*"})
 public class UsersController extends HttpServlet {
 
     private Map<String, User> users;
@@ -31,6 +33,8 @@ public class UsersController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> uri = parseUri(req.getRequestURI(), "users");
 
+        System.out.println(resp.getContentType());
+
         if (uri.size() == 1){
             /**
              * Récupère la liste des utilisateurs
@@ -38,7 +42,17 @@ public class UsersController extends HttpServlet {
              * 401: utilisateur non authentifié
              * 403: utilisateur non administrateur
              */
+            if (req.getSession(true).getAttribute("user") == null){
+                resp.sendError(401);
+                return;
+            } else if (!((User)req.getSession(true).getAttribute("user")).getAdmin()){
+                resp.sendError(403);
+                return;
+            }
             req.setAttribute("users", users);
+            req.setAttribute("page", "contenus/users.jsp");
+
+            processRequest(req, resp);
 
         } else if (uri.size() == 2){
             /**
@@ -48,8 +62,20 @@ public class UsersController extends HttpServlet {
              * 403: utilisateur non administrateur (si l'utilisateur n'est pas celui qui est logué)
              * 404: utilisateur non trouvé
              */
+            if (!((User)req.getSession(true).getAttribute("user")).getAdmin()){
+                if (!uri.get(1).equals(((User)req.getSession(true).getAttribute("user")).getLogin())){
+                    resp.sendError(403);
+                    return;
+                }
+            } else if (users.get(uri.get(1)) == null){
+                resp.sendError(404);
+                return;
+            }
             String login = uri.get(1);
             req.setAttribute("user", users.get(login));
+            req.setAttribute("page", "contenus/user.jsp");
+
+            processRequest(req, resp);
 
         } else if (uri.size() == 3){
             if (uri.get(2).equals("passages")){
@@ -59,6 +85,8 @@ public class UsersController extends HttpServlet {
                  * 401: utilisateur non authentifié
                  * 403: utilisateur non administrateur
                  */
+                resp.setStatus(303);
+                resp.sendRedirect("/passages/byUser/" + uri.get(1));
             }
         }
     }
@@ -77,10 +105,14 @@ public class UsersController extends HttpServlet {
                  * 403: utilisateur non administrateur
                  * 404: utilisateur non trouvé
                  */
+                if (users.get(uri.get(1)) == null){
+                    resp.sendError(404);
+                    return;
+                }
                 String login = uri.get(1);
                 String name = (String) req.getAttribute("name"); // A modifier
                 users.get(login).setNom(name);
-
+                //TODO: METTRE A JOUR LE FORMULAIRE
             }
         }
     }
@@ -96,12 +128,51 @@ public class UsersController extends HttpServlet {
                  * 204: OK
                  * 400: paramètres de requêtes non acceptable
                  */
+
+
+                StringBuilder buffer = new StringBuilder();
+                BufferedReader reader = req.getReader();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                    buffer.append(line);
+                    buffer.append(System.lineSeparator());
+                }
+                String data = buffer.toString();
+                System.out.println("data: " + data);
+
+
+
+
+
+
+                String login = req.getParameter("login");
+                if(login != null && !login.equals("")) {
+                    System.out.println("USERS");
+                    User user = new User(login);
+                    user.setNom(req.getParameter("nom"));
+                    user.setAdmin(req.getParameter("admin") != null && req.getParameter("admin").equals("on"));
+                    HttpSession session = req.getSession(true);
+                    session.setAttribute("user", user);
+
+                    users.put(req.getParameter("login"), user);
+
+                    resp.setStatus(204);
+                    resp.setHeader("Location", "/users/" + user.getLogin());
+                } else {
+                    resp.sendError(400, "Paramètres de requêtes non acceptables...");
+                    return;
+                }
+
             } else if (uri.get(1).equals("logout")){
                 /**
                  * Déconnecte l'utilisateur
                  * 204: OK
-                 * 400: paramètres de requêtes non acceptable
+                 * 401: utilisateur non authentifié
                  */
+                resp.setStatus(204);
+                req.getSession().invalidate();
+
             }
         }
     }

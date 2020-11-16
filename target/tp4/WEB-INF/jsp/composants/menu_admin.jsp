@@ -33,8 +33,7 @@
     </ul>
     <p><strong>Autres ressources</strong></p>
     <ul>
-        <!-- admin?contenu=salles -->
-        <li><em><a href="salles/machin/bidule/truc">Salles</a></em></li>
+        <li><em><a href="admin?contenu=salles">Salles</a></em></li>
         <li><em><a href="admin?contenu=users">Utilisateurs</a></em></li>
     </ul>
 

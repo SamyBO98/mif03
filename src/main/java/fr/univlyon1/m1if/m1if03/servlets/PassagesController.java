@@ -18,14 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @WebServlet(name = "PassagesController",
-        urlPatterns = {
-                "/passages", "/passages/*",
-                "/passages/byUser/*", "/passages/byUser/*/enCours",
-                "/passages/byUserAndDates/*/*/*",
-                "passages/bySalle/*",
-                "/passages/bySalleAndDates/*/*/*",
-                "/passages/byUserAndSalle/*/*"
-        })
+        urlPatterns = "/passages*")
 public class PassagesController extends HttpServlet {
 
     GestionPassages passages;
