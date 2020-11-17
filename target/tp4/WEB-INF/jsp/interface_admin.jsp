@@ -16,9 +16,6 @@
     <jsp:include page="composants/menu_admin.jsp"/>
     <article class="contenu">
         <c:choose>
-            <c:when test="${ requestScope.page != null }">
-                <jsp:include page="${ requestScope.page }"/>
-            </c:when>
             <c:when test="${param.contenu == null }">
                 <jsp:include page="contenus/default_admin.jsp"/>
             </c:when>

@@ -55,7 +55,7 @@
         <configuration>
           <url>http://localhost:8080/manager/text</url>
           <server>TomcatServer</server>
-          <path>/tp4_war</path>
+          <path>/tp4</path>
         </configuration>
       </plugin>
     </plugins>
