@@ -16,11 +16,11 @@
     <jsp:include page="composants/menu_admin.jsp"/>
     <article class="contenu">
         <c:choose>
-            <c:when test="${param.contenu == null }">
+            <c:when test="${ requestScope.page == null }">
                 <jsp:include page="contenus/default_admin.jsp"/>
             </c:when>
             <c:otherwise>
-                <jsp:include page="contenus/${param.contenu}.jsp"/>
+                <jsp:include page="contenus/${ requestScope.page }.jsp"/>
             </c:otherwise>
         </c:choose>
     </article>

@@ -10,5 +10,5 @@
     <c:if test="${sessionScope.user.admin}">
         <p><em><a href="admin">Interface d'administration</a></em></p>
     </c:if>
-    <p><a href="Deco">Déconnexion</a></p>
+    <p><a href="users/logout">Déconnexion</a></p>
 </aside>

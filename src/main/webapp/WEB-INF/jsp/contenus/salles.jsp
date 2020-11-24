@@ -15,9 +15,10 @@
         --%>
         <c:forEach items="${applicationScope.salles.entrySet()}" var="salleEntry">
             <tr>
-                <td><a href="admin?contenu=salle&nomSalle=${salleEntry.value.nom}">${salleEntry.value.nom}</a></td>
+                <td><a href="salles/${salleEntry.value.nom}">${salleEntry.value.nom}</a></td>
+                <!-- MODIFICATION DE LA CAPACITE D'UNE SALLE (PUT) -->
                 <td>
-                    <form action="admin" method="post" accept-charset="utf-8">
+                    <form action="salles" method="post" accept-charset="utf-8">
                         <input type="text" name="capacite" size="3"
                                value="${salleEntry.value.capacite != -1 ? salleEntry.value.capacite : ''}"/>
                         <input type="hidden" name="contenu" value="salles">
@@ -31,8 +32,9 @@
                         <strong style="color: red">Capacité dépassée</strong>
                     </c:if>
                 </td>
+                <!-- SUPPRESSION D'UNE SALLE (DELETE) -->
                 <td>
-                    <form action="admin" method="post" accept-charset="UTF-8">
+                    <form action="salles" method="post" accept-charset="UTF-8">
                         <input type="hidden" name="contenu" value="salles">
                         <input type="hidden" name="nomSalle" value="${salleEntry.value.nom}">
                         <input type="submit" name="action" value="Supprimer">
@@ -42,8 +44,10 @@
         </c:forEach>
     </table>
     <hr>
+
+    <!-- AJOUT D'UNE SALLE (POST) -->
     <h2>Ajouter une salle</h2>
-    <form action="admin" method="post" accept-charset="UTF-8">
+    <form action="salles" method="post" accept-charset="UTF-8">
         <input type="hidden" name="contenu" value="salles">
         <label> Nom de la salle :
             <input type="text" name="nomSalle">

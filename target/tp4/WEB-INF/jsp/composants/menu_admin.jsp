@@ -38,5 +38,5 @@
     </ul>
 
     <p><a href="presence">Interface classique</a></p>
-    <p><a href="Deco">Déconnexion</a></p>
+    <p><a href="users/logout">Déconnexion</a></p>
 </aside>

@@ -4,15 +4,18 @@ import fr.univlyon1.m1if.m1if03.classes.User;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import static fr.univlyon1.m1if.m1if03.utils.ParseURI.parseUri;
 
+@WebServlet(name = "UsersController", urlPatterns = {"/users", "/users/*"})
 public class UsersController extends HttpServlet {
 
     Map<String, User> users;
@@ -27,6 +30,8 @@ public class UsersController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> uri = parseUri(req.getRequestURI(), "users");
+        HttpSession session = req.getSession(true);
+        User user = (User) session.getAttribute("user");
 
         if (uri.size() == 0){
             /**
@@ -35,6 +40,16 @@ public class UsersController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
+            if (user == null){
+                resp.sendError(401, "Utilisateur non authentifié");
+                return;
+            } else if (!user.getAdmin()){
+                resp.sendError(403, "Utilisateur non administrateur");
+                return;
+            } else {
+                req.setAttribute("page", "users");
+                requestDispatcherAdmin(req, resp);
+            }
         } else if (uri.size() == 1){
             /**
              * Renvoie la représentation d'un utilisateur
@@ -43,6 +58,23 @@ public class UsersController extends HttpServlet {
              * Code 403: Utilisateur non administrateur
              * Code 404: Utilisateur non trouvé
              */
+            if (user == null){
+                resp.sendError(401, "Utilisateur non authentifié");
+                return;
+            } else if (!user.getAdmin()){
+                resp.sendError(403, "Utilisateur non administrateur");
+                return;
+            } else {
+                User userSearch = users.get(uri.get(0));
+                if (userSearch == null){
+                    resp.sendError(404, "Utilisateur non trouvé");
+                    return;
+                }
+                req.setAttribute("user", userSearch);
+                req.setAttribute("page", "user");
+                requestDispatcherAdmin(req, resp);
+            }
+
         } else if (uri.size() == 2){
             if (uri.get(1).equals("passages")){
                 /**
@@ -51,6 +83,15 @@ public class UsersController extends HttpServlet {
                  * Code 401: Utilisateur non authentifié
                  * Code 403: Utilisateur non administrateur
                  */
+            }
+            if (user == null){
+                resp.sendError(401, "Utilisateur non authentifié");
+                return;
+            } else if (!user.getAdmin()){
+                resp.sendError(403, "Utilisateur non administrateur");
+                return;
+            } else {
+                // Redirection 303
             }
         }
     }
@@ -66,12 +107,32 @@ public class UsersController extends HttpServlet {
                  * Code 204: OK
                  * Code 400: Paramètres de requête non acceptables
                  */
+                if (req.getParameter("action") != null && req.getParameter("action").equals("Connexion")
+                        && req.getParameter("login") != null && !req.getParameter("login").equals("")
+                        && req.getSession(true).getAttribute("user") == null){
+                    User user = new User(req.getParameter("login"));
+                    user.setNom(req.getParameter("nom"));
+                    user.setAdmin(req.getParameter("admin") != null && req.getParameter("admin").equals("on"));
+
+                    // On ajoute l'user à la session
+                    HttpSession session = req.getSession(true);
+                    session.setAttribute("user", user);
+                    // On rajoute l'user dans le DAO
+
+                    users.put(req.getParameter("login"), user);
+                }
             } else if (uri.get(0).equals("logout")){
                 /**
                  * Déconnecte l'utilisateur
                  * Code 204: OK
                  * Code 401: Utilisateur non authentifié
                  */
+                if (req.getSession(true).getAttribute("user") != null){
+                    req.getSession().invalidate();
+                    resp.sendRedirect("./");
+                } else {
+                    resp.sendError(401, "Utilisateur non authentifié");
+                }
             }
         }
     }
@@ -92,5 +153,17 @@ public class UsersController extends HttpServlet {
                  */
             }
         }
+    }
+
+
+
+    private void requestDispatcher(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/WEB-INF/jsp/interface.jsp")
+                .include(req, resp);
+    }
+
+    private void requestDispatcherAdmin(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/WEB-INF/jsp/interface_admin.jsp")
+                .include(req, resp);
     }
 }

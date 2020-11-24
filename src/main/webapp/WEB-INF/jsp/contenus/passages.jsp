@@ -8,13 +8,13 @@
 <section>
     <h1>
         Liste des passages
-        <c:if test="${param.login != null}">
-            pour l'utilisateur ${param.login}
+        <c:if test="${requestScope.login != null}">
+            pour l'utilisateur ${requestScope.login}
         </c:if>
-        <c:if test="${param.nomSalle != null}">
-            dans la salle ${param.nomSalle}
+        <c:if test="${requestScope.salle != null}">
+            dans la salle ${requestScope.salle}
         </c:if>
-        <c:if test="${param.dateSortie != null}">
+        <c:if test="${requestScope.dateSortie != null}">
             <%
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"));
@@ -43,7 +43,7 @@
             <th>Entrée</th>
             <th>Sortie</th>
         </tr>
-        <c:forEach items="${requestScope.passagesAffiches}" var="passage">
+        <c:forEach items="${requestScope.passages}" var="passage">
             <tr>
                 <td><a href="<%= request.getServletPath().substring(1) %>?contenu=passage&num=${passage.id}">${passage.id}</a></td>
                 <td>

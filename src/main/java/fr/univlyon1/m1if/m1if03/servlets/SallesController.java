@@ -2,6 +2,7 @@ package fr.univlyon1.m1if.m1if03.servlets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.univlyon1.m1if.m1if03.classes.Salle;
+import fr.univlyon1.m1if.m1if03.classes.User;
 import fr.univlyon1.m1if.m1if03.dtos.SalleDTO;
 
 import javax.servlet.ServletConfig;
@@ -10,6 +11,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,8 @@ public class SallesController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> uri = parseUri(req.getRequestURI(), "salles");
+        HttpSession session = req.getSession(true);
+        User user = (User) session.getAttribute("user");
 
         if (uri.size() == 0){
             /**
@@ -39,6 +43,16 @@ public class SallesController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
+            if (user == null){
+                resp.sendError(401, "Utilisateur non authentifié");
+                return;
+            } else if (!user.getAdmin()){
+                resp.sendError(403, "Utilisateur non administrateur");
+                return;
+            } else {
+                req.setAttribute("page", "salles");
+                requestDispatcherAdmin(req, resp);
+            }
         } else if (uri.size() == 1){
             /**
              * Renvoie la représentation d'une salle
@@ -47,6 +61,24 @@ public class SallesController extends HttpServlet {
              * Code 403: Utilisateur non administrateur
              * Code 404: Salle non trouvée
              */
+            if (user == null){
+                resp.sendError(401, "Utilisateur non authentifié");
+                return;
+            } else if (!user.getAdmin()){
+                resp.sendError(403, "Utilisateur non administrateur");
+                return;
+            } else {
+                Salle salle;
+                salle = salles.get(uri.get(0));
+                if (salle == null){
+                    resp.sendError(404, "Salle non trouvée");
+                    return;
+                } else {
+                    req.setAttribute("page", "salle");
+                    req.setAttribute("salle", salle);
+                    requestDispatcherAdmin(req, resp);
+                }
+            }
         } else if (uri.size() == 2){
             if (uri.get(1).equals("passages")){
                 /**
@@ -56,6 +88,15 @@ public class SallesController extends HttpServlet {
                  * Code 401: Utilisateur non authentifié
                  * Code 403: Utilisateur non administrateur
                  */
+                if (user == null){
+                    resp.sendError(401, "Utilisateur non authentifié");
+                    return;
+                } else if (!user.getAdmin()){
+                    resp.sendError(403, "Utilisateur non administrateur");
+                    return;
+                } else {
+                    // Redirection 303
+                }
             }
         }
     }
@@ -63,6 +104,8 @@ public class SallesController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> uri = parseUri(req.getRequestURI(), "salles");
+        HttpSession session = req.getSession(true);
+        User user = (User) session.getAttribute("user");
 
         if (uri.size() == 0){
             /**
@@ -72,14 +115,60 @@ public class SallesController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
-            SalleDTO salle = new ObjectMapper().readValue(req.getReader(), SalleDTO.class);
-
-            if (salle == null){
-                resp.sendError(400);
+            if (user == null){
+                resp.sendError(401, "Utilisateur non authentifié");
+                return;
+            } else if (!user.getAdmin()){
+                resp.sendError(403, "Utilisateur non administrateur");
+                return;
             } else {
-                resp.setStatus(201);
+                /**
+                 * Modif pour le moment: si on appuie sur "Ajouter", on ajoute une salle
+                 * Modif pour le moment: si on appuie sur "Modifier", on modifie la capacité de la salle
+                 * Modif pour le moment: si on appuie sur "Supprimer", on supprime la salle
+                 */
+                String nomSalle = req.getParameter("nomSalle");
+
+                if (nomSalle != null && !nomSalle.equals("")){
+                    Salle salle = salles.get(nomSalle);
+                    String action = req.getParameter("action");
+
+                    switch (action){
+                        case "Ajouter":
+                            if (salle != null){
+                                resp.sendError(400, "La salle existe déjà");
+                                return;
+                            } else {
+                                salles.put(nomSalle, new Salle(nomSalle));
+                            }
+                            break;
+                        case "Modifier":
+                            try {
+                                salle.setCapacite(Integer.parseInt(req.getParameter("capacite")));
+                            } catch (NumberFormatException e) {
+                                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "La capacité d'une salle doit être un nombre entier.");
+                                return;
+                            }
+                            break;
+                        case "Supprimer":
+                            if (salle == null){
+                                resp.sendError(400, "Salle non trouvée");
+                                return;
+                            } else {
+                                salles.remove(nomSalle);
+                            }
+                            break;
+                    }
+                    req.setAttribute("page", "salles");
+                } else {
+                    resp.sendError(400, "Paramètres de requête non acceptables");
+                    return;
+                }
             }
         }
+
+        doGet(req, resp);
+
     }
 
     @Override
@@ -110,6 +199,17 @@ public class SallesController extends HttpServlet {
              * Code 403: Utilisateur non administrateur
              */
         }
+    }
+
+
+    private void requestDispatcher(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/WEB-INF/jsp/interface.jsp")
+            .include(req, resp);
+    }
+
+    private void requestDispatcherAdmin(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/WEB-INF/jsp/interface_admin.jsp")
+                .include(req, resp);
     }
 
 }

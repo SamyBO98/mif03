@@ -15,7 +15,7 @@
         --%>
         <c:forEach items="${applicationScope.users.entrySet()}" var="userEntry">
             <tr>
-                <td><a href="admin?contenu=user&login=${userEntry.value.login}">${userEntry.value.login}</a></td>
+                <td><a href="users/${userEntry.value.login}">${userEntry.value.login}</a></td>
                 <td>${userEntry.value.nom}</td>
                 <td>${userEntry.value.admin == true ? "oui" : "non"}</td>
             </tr>
