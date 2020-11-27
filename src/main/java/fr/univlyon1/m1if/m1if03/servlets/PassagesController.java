@@ -37,10 +37,7 @@ public class PassagesController extends HttpServlet {
         HttpSession session = req.getSession(true);
         User user = (User) session.getAttribute("user");
 
-        if (user == null){
-            resp.sendError(401, "Utilisateur non authentifié");
-            return;
-        } else if (!user.getAdmin()){
+        if (!user.getAdmin()){
             resp.sendError(403, "Utilisateur non administrateur");
             return;
         }

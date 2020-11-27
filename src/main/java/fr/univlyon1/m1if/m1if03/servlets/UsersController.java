@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -40,16 +41,20 @@ public class UsersController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
-            if (user == null){
-                resp.sendError(401, "Utilisateur non authentifié");
-                return;
-            } else if (!user.getAdmin()){
-                resp.sendError(403, "Utilisateur non administrateur");
-                return;
-            } else {
+
+            if (req.getHeader("accept").contains("application/json")){
+                //JSON
+                PrintWriter out = resp.getWriter();
+                for (Map.Entry<String, User> userName: users.entrySet()){
+                    out.write("{ " + req.getRequestURI() + "/" + userName.getValue().getLogin() + " }\n");
+                }
+
+            } else if (req.getHeader("accept").contains("text/html")){
+                //HTML
                 req.setAttribute("page", "users");
                 requestDispatcherAdmin(req, resp);
             }
+            resp.setStatus(200);
         } else if (uri.size() == 1){
             /**
              * Renvoie la représentation d'un utilisateur
@@ -58,10 +63,7 @@ public class UsersController extends HttpServlet {
              * Code 403: Utilisateur non administrateur
              * Code 404: Utilisateur non trouvé
              */
-            if (user == null){
-                resp.sendError(401, "Utilisateur non authentifié");
-                return;
-            } else if (!user.getAdmin()){
+            if (!user.getAdmin()){
                 resp.sendError(403, "Utilisateur non administrateur");
                 return;
             } else {
@@ -84,10 +86,7 @@ public class UsersController extends HttpServlet {
                  * Code 403: Utilisateur non administrateur
                  */
             }
-            if (user == null){
-                resp.sendError(401, "Utilisateur non authentifié");
-                return;
-            } else if (!user.getAdmin()){
+            if (!user.getAdmin()){
                 resp.sendError(403, "Utilisateur non administrateur");
                 return;
             } else {
@@ -130,8 +129,6 @@ public class UsersController extends HttpServlet {
                 if (req.getSession(true).getAttribute("user") != null){
                     req.getSession().invalidate();
                     resp.sendRedirect("./");
-                } else {
-                    resp.sendError(401, "Utilisateur non authentifié");
                 }
             }
         }

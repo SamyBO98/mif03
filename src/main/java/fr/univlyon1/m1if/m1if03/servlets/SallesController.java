@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,21 @@ public class SallesController extends HttpServlet {
         HttpSession session = req.getSession(true);
         User user = (User) session.getAttribute("user");
 
+
+        BufferedReader reader=req.getReader();
+        String json=reader.readLine();
+        reader.close();
+        String infoSalle[]=json.split(":");
+        for (String i: infoSalle){
+            System.out.println(i);
+        }
+
+        //JSON
+        if (req.getHeader("accept").equals("application/json")){
+            System.out.println("JSOOOOOON");
+        }
+
+
         if (uri.size() == 0){
             /**
              * Crée une nouvelle salle
@@ -115,10 +131,7 @@ public class SallesController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
-            if (user == null){
-                resp.sendError(401, "Utilisateur non authentifié");
-                return;
-            } else if (!user.getAdmin()){
+            if (!user.getAdmin()){
                 resp.sendError(403, "Utilisateur non administrateur");
                 return;
             } else {
