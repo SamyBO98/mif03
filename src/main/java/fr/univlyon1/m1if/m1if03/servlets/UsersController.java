@@ -45,9 +45,12 @@ public class UsersController extends HttpServlet {
             if (req.getHeader("accept").contains("application/json")){
                 //JSON
                 PrintWriter out = resp.getWriter();
+                out.write("[\n");
                 for (Map.Entry<String, User> userName: users.entrySet()){
-                    out.write("{ " + req.getRequestURI() + "/" + userName.getValue().getLogin() + " }\n");
+                    out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + userName.getValue().getLogin() + "\"\n");
                 }
+                out.write("]");
+                out.close();
 
             } else if (req.getHeader("accept").contains("text/html")){
                 //HTML
@@ -63,19 +66,30 @@ public class UsersController extends HttpServlet {
              * Code 403: Utilisateur non administrateur
              * Code 404: Utilisateur non trouvé
              */
-            if (!user.getAdmin()){
-                resp.sendError(403, "Utilisateur non administrateur");
+            User u = users.get(uri.get(0));
+            if (u == null){
+                resp.sendError(404, "Utilisateur non trouvé");
                 return;
-            } else {
-                User userSearch = users.get(uri.get(0));
-                if (userSearch == null){
-                    resp.sendError(404, "Utilisateur non trouvé");
-                    return;
-                }
-                req.setAttribute("user", userSearch);
+            }
+
+            if (req.getHeader("accept").contains("application/json")){
+                //JSON
+                PrintWriter out = resp.getWriter();
+                out.write("{\n");
+                out.write("\"login\": \"" + u.getLogin() + "\",\n");
+                out.write("\"nom\": \"" + u.getNom() + "\",\n");
+                out.write("\"admin\": \"" + (u.getAdmin() ? "true": "false") + "\"\n");
+                out.write("}");
+                out.close();
+
+            } else if (req.getHeader("accept").contains("text/html")){
+                //HTML
+                req.setAttribute("user", u);
                 req.setAttribute("page", "user");
                 requestDispatcherAdmin(req, resp);
             }
+
+            resp.setStatus(200);
 
         } else if (uri.size() == 2){
             if (uri.get(1).equals("passages")){

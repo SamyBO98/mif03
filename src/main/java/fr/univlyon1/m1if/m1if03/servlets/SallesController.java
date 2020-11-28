@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -44,16 +45,22 @@ public class SallesController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
-            if (user == null){
-                resp.sendError(401, "Utilisateur non authentifié");
-                return;
-            } else if (!user.getAdmin()){
-                resp.sendError(403, "Utilisateur non administrateur");
-                return;
-            } else {
+            if (req.getHeader("accept").contains("application/json")){
+                //JSON
+                PrintWriter out = resp.getWriter();
+                out.write("[\n");
+                for (Map.Entry<String, Salle> salle: salles.entrySet()){
+                    out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + salle.getValue().getNom() + "\"\n");
+                }
+                out.write("]");
+                out.close();
+
+            } else if (req.getHeader("accept").contains("text/html")){
+                //HTML
                 req.setAttribute("page", "salles");
                 requestDispatcherAdmin(req, resp);
             }
+            resp.setStatus(200);
         } else if (uri.size() == 1){
             /**
              * Renvoie la représentation d'une salle
@@ -62,24 +69,32 @@ public class SallesController extends HttpServlet {
              * Code 403: Utilisateur non administrateur
              * Code 404: Salle non trouvée
              */
-            if (user == null){
-                resp.sendError(401, "Utilisateur non authentifié");
+            Salle salle;
+            salle = salles.get(uri.get(0));
+            if (salle == null){
+                resp.sendError(404, "Salle non trouvée");
                 return;
-            } else if (!user.getAdmin()){
-                resp.sendError(403, "Utilisateur non administrateur");
-                return;
-            } else {
-                Salle salle;
-                salle = salles.get(uri.get(0));
-                if (salle == null){
-                    resp.sendError(404, "Salle non trouvée");
-                    return;
-                } else {
-                    req.setAttribute("page", "salle");
-                    req.setAttribute("salle", salle);
-                    requestDispatcherAdmin(req, resp);
-                }
             }
+
+            if (req.getHeader("accept").contains("application/json")){
+                //JSON
+                PrintWriter out = resp.getWriter();
+                out.write("{\n");
+                out.write("\"nomSalle\": \"" + salle.getNom() + "\",\n");
+                out.write("\"capacite\": " + salle.getCapacite() + ",\n");
+                out.write("\"presents\": " + salle.getPresents() + "\",\n");
+                out.write("\"saturee\": " + (salle.getSaturee()? "true": "false") + "\n");
+                out.write("}");
+                out.close();
+
+            } else if (req.getHeader("accept").contains("text/html")){
+                //HTML
+                req.setAttribute("page", "salle");
+                req.setAttribute("salle", salle);
+                requestDispatcherAdmin(req, resp);
+            }
+            resp.setStatus(200);
+
         } else if (uri.size() == 2){
             if (uri.get(1).equals("passages")){
                 /**
@@ -117,10 +132,6 @@ public class SallesController extends HttpServlet {
             System.out.println(i);
         }
 
-        //JSON
-        if (req.getHeader("accept").equals("application/json")){
-            System.out.println("JSOOOOOON");
-        }
 
 
         if (uri.size() == 0){
@@ -140,10 +151,9 @@ public class SallesController extends HttpServlet {
                  * Modif pour le moment: si on appuie sur "Modifier", on modifie la capacité de la salle
                  * Modif pour le moment: si on appuie sur "Supprimer", on supprime la salle
                  */
-                String nomSalle = req.getParameter("nomSalle");
 
-                if (nomSalle != null && !nomSalle.equals("")){
-                    Salle salle = salles.get(nomSalle);
+                if (req.getParameter("nomSalle") != null){
+                    Salle salle = salles.get(req.getParameter("nomSalle"));
                     String action = req.getParameter("action");
 
                     switch (action){
@@ -152,7 +162,7 @@ public class SallesController extends HttpServlet {
                                 resp.sendError(400, "La salle existe déjà");
                                 return;
                             } else {
-                                salles.put(nomSalle, new Salle(nomSalle));
+                                salles.put(req.getParameter("nomSalle"), new Salle(req.getParameter("nomSalle")));
                             }
                             break;
                         case "Modifier":
@@ -168,7 +178,7 @@ public class SallesController extends HttpServlet {
                                 resp.sendError(400, "Salle non trouvée");
                                 return;
                             } else {
-                                salles.remove(nomSalle);
+                                salles.remove(req.getParameter("nomSalle"));
                             }
                             break;
                     }
