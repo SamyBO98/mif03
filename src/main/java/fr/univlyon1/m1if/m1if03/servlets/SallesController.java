@@ -123,7 +123,7 @@ public class SallesController extends HttpServlet {
         HttpSession session = req.getSession(true);
         User user = (User) session.getAttribute("user");
 
-
+        /*
         BufferedReader reader=req.getReader();
         String json=reader.readLine();
         reader.close();
@@ -131,6 +131,8 @@ public class SallesController extends HttpServlet {
         for (String i: infoSalle){
             System.out.println(i);
         }
+
+         */
 
 
 
@@ -142,18 +144,40 @@ public class SallesController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
-            if (!user.getAdmin()){
-                resp.sendError(403, "Utilisateur non administrateur");
-                return;
-            } else {
-                /**
+            /**
                  * Modif pour le moment: si on appuie sur "Ajouter", on ajoute une salle
                  * Modif pour le moment: si on appuie sur "Modifier", on modifie la capacité de la salle
                  * Modif pour le moment: si on appuie sur "Supprimer", on supprime la salle
                  */
+            String action = req.getParameter("action");
 
-                if (req.getParameter("nomSalle") != null){
-                    Salle salle = salles.get(req.getParameter("nomSalle"));
+            if (action != null && action.equals("Ajouter")){
+                String nomSalle = req.getParameter("nomSalle");
+
+                if (nomSalle != null && !nomSalle.equals("")){
+                    Salle salle = salles.get(nomSalle);
+                    if (salle != null){
+                        resp.sendError(400, "This room already exists.");
+                        return;
+                    } else {
+                        salle = new Salle(nomSalle);
+                        salles.put(req.getParameter("nomSalle"), salle);
+                        resp.setHeader("Location", "http://localhost:8080/tp4_war/salles/" + salle.getNom());
+                    }
+                } else {
+                    resp.sendError(400, "A room should have a name.");
+                    return;
+                }
+            } else {
+                resp.sendError(400, "You didn't choose 'Add' button.");
+                return;
+            }
+            resp.setStatus(201);
+            System.out.println(resp.getHeaderNames());
+
+            /*
+               if (req.getParameter("nomSalle") != null){
+                   Salle salle = salles.get(req.getParameter("nomSalle"));
                     String action = req.getParameter("action");
 
                     switch (action){
@@ -187,10 +211,11 @@ public class SallesController extends HttpServlet {
                     resp.sendError(400, "Paramètres de requête non acceptables");
                     return;
                 }
-            }
+
+                 */
         }
 
-        doGet(req, resp);
+        //doGet(req, resp);
 
     }
 
