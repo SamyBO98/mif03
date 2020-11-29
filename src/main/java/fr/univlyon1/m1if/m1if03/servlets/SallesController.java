@@ -45,6 +45,7 @@ public class SallesController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
+            System.out.println(resp.getHeaderNames());
             if (req.getHeader("accept").contains("application/json")){
                 //JSON
                 PrintWriter out = resp.getWriter();
@@ -104,15 +105,8 @@ public class SallesController extends HttpServlet {
                  * Code 401: Utilisateur non authentifié
                  * Code 403: Utilisateur non administrateur
                  */
-                if (user == null){
-                    resp.sendError(401, "Utilisateur non authentifié");
-                    return;
-                } else if (!user.getAdmin()){
-                    resp.sendError(403, "Utilisateur non administrateur");
-                    return;
-                } else {
-                    // Redirection 303
-                }
+                resp.setStatus(301);
+                resp.setHeader("Location", "/tp4_war/passages/bySalle/" + uri.get(0));
             }
         }
     }
