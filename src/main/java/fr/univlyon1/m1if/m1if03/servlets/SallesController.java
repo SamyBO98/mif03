@@ -1,10 +1,12 @@
 package fr.univlyon1.m1if.m1if03.servlets;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.univlyon1.m1if.m1if03.classes.Salle;
 import fr.univlyon1.m1if.m1if03.classes.User;
 import fr.univlyon1.m1if.m1if03.dtos.SalleDTO;
 
+import javax.json.JsonObject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,9 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -117,19 +117,6 @@ public class SallesController extends HttpServlet {
         HttpSession session = req.getSession(true);
         User user = (User) session.getAttribute("user");
 
-        /*
-        BufferedReader reader=req.getReader();
-        String json=reader.readLine();
-        reader.close();
-        String infoSalle[]=json.split(":");
-        for (String i: infoSalle){
-            System.out.println(i);
-        }
-
-         */
-
-
-
         if (uri.size() == 0){
             /**
              * Crée une nouvelle salle
@@ -138,36 +125,38 @@ public class SallesController extends HttpServlet {
              * Code 401: Utilisateur non authentifié
              * Code 403: Utilisateur non administrateur
              */
-            /**
-                 * Modif pour le moment: si on appuie sur "Ajouter", on ajoute une salle
-                 * Modif pour le moment: si on appuie sur "Modifier", on modifie la capacité de la salle
-                 * Modif pour le moment: si on appuie sur "Supprimer", on supprime la salle
-                 */
-            String action = req.getParameter("action");
+            if (req.getHeader("accept").contains("application/json")){
+                SalleDTO salleDTO = new ObjectMapper().readValue(req.getReader(), SalleDTO.class);
 
-            if (action != null && action.equals("Ajouter")){
-                String nomSalle = req.getParameter("nomSalle");
+                String json = new ObjectMapper().writeValueAsString(salleDTO);
+                System.out.println(json);
 
-                if (nomSalle != null && !nomSalle.equals("")){
-                    Salle salle = salles.get(nomSalle);
-                    if (salle != null){
-                        resp.sendError(400, "This room already exists.");
-                        return;
+            } else if (req.getHeader("accept").contains("text/html")){
+                String action = req.getParameter("action");
+
+                if (action != null && action.equals("Ajouter")){
+                    String nomSalle = req.getParameter("nomSalle");
+
+                    if (nomSalle != null && !nomSalle.equals("")){
+                        Salle salle = salles.get(nomSalle);
+                        if (salle != null){
+                            resp.sendError(400, "This room already exists.");
+                            return;
+                        } else {
+                            salle = new Salle(nomSalle);
+                            salles.put(req.getParameter("nomSalle"), salle);
+                            resp.setHeader("Location", "http://localhost:8080/tp4_war/salles/" + salle.getNom());
+                        }
                     } else {
-                        salle = new Salle(nomSalle);
-                        salles.put(req.getParameter("nomSalle"), salle);
-                        resp.setHeader("Location", "http://localhost:8080/tp4_war/salles/" + salle.getNom());
+                        resp.sendError(400, "A room should have a name.");
+                        return;
                     }
                 } else {
-                    resp.sendError(400, "A room should have a name.");
+                    resp.sendError(400, "You didn't choose 'Add' button.");
                     return;
                 }
-            } else {
-                resp.sendError(400, "You didn't choose 'Add' button.");
-                return;
+                resp.setStatus(201);
             }
-            resp.setStatus(201);
-            System.out.println(resp.getHeaderNames());
 
             /*
                if (req.getParameter("nomSalle") != null){

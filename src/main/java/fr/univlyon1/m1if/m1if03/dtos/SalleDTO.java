@@ -9,11 +9,17 @@ public class SalleDTO {
     private int presents;
     private boolean saturee;
 
-    public SalleDTO(Salle salle){
-        this.nomSalle = salle.getNom();
+    public SalleDTO(){
         this.capacite = -1;
         this.presents = 0;
         this.saturee = false;
+    }
+
+    public SalleDTO(Salle salle){
+        this.nomSalle = salle.getNom();
+        this.capacite = salle.getCapacite();
+        this.presents = salle.getPresents();
+        this.saturee = salle.getSaturee();
     }
 
     public String getNomSalle(){
