@@ -2,18 +2,14 @@ package fr.univlyon1.m1if.m1if03.dtos;
 
 import fr.univlyon1.m1if.m1if03.classes.Salle;
 
+import java.util.Objects;
+
 public class SalleDTO {
 
     private String nomSalle;
     private int capacite;
     private int presents;
     private boolean saturee;
-
-    public SalleDTO(){
-        this.capacite = -1;
-        this.presents = 0;
-        this.saturee = false;
-    }
 
     public SalleDTO(Salle salle){
         this.nomSalle = salle.getNom();
@@ -34,9 +30,11 @@ public class SalleDTO {
         return this.presents;
     }
 
-    public boolean getSaturee(){
-        return this.saturee;
+    public boolean getSaturee() {
+        return capacite > -1 && this.getPresents() > this.getCapacite();
     }
+
+
 
     public void setNomSalle(String nomSalle){
         this.nomSalle = nomSalle;
@@ -52,5 +50,24 @@ public class SalleDTO {
 
     public void setSaturee(boolean saturee){
         this.saturee = saturee;
+    }
+
+
+
+    public void incPresent() {
+        this.presents++;
+    }
+
+    public void decPresent() {
+        this.presents--;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SalleDTO salleDTO = (SalleDTO) o;
+        return Objects.equals(nomSalle, salleDTO.nomSalle);
     }
 }

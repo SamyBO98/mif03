@@ -20,6 +20,7 @@ import static fr.univlyon1.m1if.m1if03.utils.ParseURI.parseUri;
 public class UsersController extends HttpServlet {
 
     Map<String, User> users;
+    String splitter = "users";
 
     @Override
     @SuppressWarnings("unchecked")

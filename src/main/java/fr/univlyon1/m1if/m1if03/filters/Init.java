@@ -3,6 +3,7 @@ package fr.univlyon1.m1if.m1if03.filters;
 import fr.univlyon1.m1if.m1if03.classes.GestionPassages;
 import fr.univlyon1.m1if.m1if03.classes.Salle;
 import fr.univlyon1.m1if.m1if03.classes.User;
+import fr.univlyon1.m1if.m1if03.dtos.SalleDTO;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;

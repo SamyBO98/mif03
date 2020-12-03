@@ -28,21 +28,18 @@ public class ParseURI {
             }
         }
 
-        System.out.println(res);
-
         return res;
     }
 
     /**
      * Split the URI by using the / .
-     * @param uri
+     * @param url full url name.
+     * @param splitter splitter.
      * @return First argument of the splitted URI
      */
-    public static String sourceURI(final String uri) {
-        List<String> temp = Arrays.asList(uri.split("/"));
+    public static String sourceURI(String url, String splitter) {
+        String source = url.split("/" + splitter)[0];
 
-        return temp.get(1);
+        return source;
     }
-
-
 }

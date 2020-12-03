@@ -4,6 +4,7 @@ import fr.univlyon1.m1if.m1if03.classes.GestionPassages;
 import fr.univlyon1.m1if.m1if03.classes.Passage;
 import fr.univlyon1.m1if.m1if03.classes.Salle;
 import fr.univlyon1.m1if.m1if03.classes.User;
+import fr.univlyon1.m1if.m1if03.dtos.PassageDTO;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -25,6 +26,7 @@ import static fr.univlyon1.m1if.m1if03.utils.ParseURI.parseUri;
 public class PassagesController extends HttpServlet {
 
     GestionPassages passages;
+    String splitter = "passages";
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -78,12 +80,7 @@ public class PassagesController extends HttpServlet {
             if (req.getHeader("accept").contains("application/json")) {
                 //JSON
                 PrintWriter out = resp.getWriter();
-                out.write("{\n");
-                out.write("\"user\": \"" + passage.getUser().getLogin() + "\",\n");
-                out.write("\"salle\": \"" + passage.getSalle().getNom() + "\",\n");
-                out.write("\"dateEntree\": " + passage.getEntree().toString() + "\",\n");
-                out.write("\"dateSortie\": " + passage.getSortie().toString() + "\n");
-                out.write("}");
+                //out.write(writeJsonData(passage));
                 out.close();
             } else if (req.getHeader("accept").contains("text/html")){
                 req.setAttribute("passages", passage);
@@ -312,40 +309,51 @@ public class PassagesController extends HttpServlet {
              * Code 400: Paramètres de requête non acceptables
              * Code 401: Utilisateur non authentifié
              */
-            if (user == null){
-                resp.sendError(401, "Utilisateur non authentifié");
-                return;
-            }
 
-            String nomSalle = req.getParameter("nomSalle");
-            if (nomSalle == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Salle non spécifiée.");
-                return;
-            }
+            if (req.getHeader("accept").contains("application/json")){
+                //PassageDTO passageDTO = (PassageDTO) readJsonData(req, PassageDTO.class);
 
-            Salle salle = ((Map<String, Salle>) req.getServletContext().getAttribute("salles")).get(nomSalle);
 
-            if (salle == null) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "La salle " + nomSalle + " n'existe pas.");
-                return;
-            }
+            } else if (req.getHeader("accept").contains("text/html")){
+                String nomSalle = req.getParameter("nomSalle");
 
-            if (req.getParameter("action").equals("Entrer")) {
-                Passage p = new Passage(user, salle, new Date());
-                passages.add(p);
-                salle.incPresent();
-            } else if (req.getParameter("action").equals("Sortir")) {
-                List<Passage> passTemp = passages.getPassagesByUserAndSalle(user, salle);
-                for (Passage p : passTemp) { // On mémorise une sortie de tous les passages existants et sans sortie
-                    if (p.getSortie() == null) {
-                        p.setSortie(new Date());
-                        salle.decPresent();
-                    }
+                if (nomSalle == null) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Salle non spécifiée.");
+                    return;
                 }
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action invalide.");
-                return;
+
+                Salle salle = ((Map<String, Salle>) req.getServletContext().getAttribute("salles")).get(nomSalle);
+
+                if (salle == null) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "La salle n'existe pas.");
+                    return;
+                }
+
+                if (req.getParameter("action").equals("Entrer")) {
+                    Passage p = new Passage(user, salle, new Date());
+                    passages.add(p);
+                    salle.incPresent();
+                } else if (req.getParameter("action").equals("Sortir")) {
+                    List<Passage> passTemp = passages.getPassagesByUserAndSalle(user, salle);
+                    for (Passage p : passTemp) { // On mémorise une sortie de tous les passages existants et sans sortie
+                        if (p.getSortie() == null) {
+                            p.setSortie(new Date());
+                            salle.decPresent();
+                        }
+                    }
+                } else {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action invalide.");
+                    return;
+                }
             }
+
+
+
+
+
+
+
+
         }
     }
 
