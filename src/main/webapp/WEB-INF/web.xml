@@ -36,15 +36,6 @@
   -->
 
   <filter>
-    <filter-name>Authorization</filter-name>
-    <filter-class>fr.univlyon1.m1if.m1if03.filters.AuthorizationFilter</filter-class>
-  </filter>
-  <filter-mapping>
-    <filter-name>Authorization</filter-name>
-    <url-pattern>/admin</url-pattern>
-  </filter-mapping>
-
-  <filter>
     <filter-name>CorsFilter</filter-name>
     <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
     <init-param>
@@ -64,6 +55,17 @@
     <filter-name>CorsFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+  
+  <filter>
+    <filter-name>Authorization</filter-name>
+    <filter-class>fr.univlyon1.m1if.m1if03.filters.AuthorizationFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>Authorization</filter-name>
+    <url-pattern>/admin</url-pattern>
+  </filter-mapping>
+
+
 
   <request-character-encoding>UTF-8</request-character-encoding>
   <response-character-encoding>UTF-8</response-character-encoding>
