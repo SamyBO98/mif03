@@ -11,9 +11,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -92,6 +90,11 @@ public class UsersController extends HttpServlet {
         }
     }
 
+
+    /***********************************************************/
+    /********************  PRIVATE FUNCTIONS  ******************/
+    /***********************************************************/
+
     /**
      * Liste tout les utilisateurs existants.
      * @param req requête.
@@ -102,11 +105,7 @@ public class UsersController extends HttpServlet {
         UsersDTO usersDTO = new UsersDTO(users.values(),
                 sourceURI(req.getRequestURL().toString(), splitter));
 
-        req.setAttribute("usersDTO", usersDTO);
-
-        PrintWriter out = resp.getWriter();
-        out.write(String.valueOf(usersDTO));
-        out.close();
+        printJsonValues(resp, usersDTO);
 
         resp.setStatus(200);
     }
@@ -125,9 +124,9 @@ public class UsersController extends HttpServlet {
         }
 
         UserDTO userDTO = new UserDTO(users.get(userLogin));
-        req.setAttribute("userDTO", userDTO);
 
         writeJson(resp, userDTO);
+
         resp.setStatus(200);
     }
 

@@ -5,6 +5,7 @@ import fr.univlyon1.m1if.m1if03.classes.Passage;
 import fr.univlyon1.m1if.m1if03.classes.Salle;
 import fr.univlyon1.m1if.m1if03.classes.User;
 import fr.univlyon1.m1if.m1if03.dtos.PassageDTO;
+import fr.univlyon1.m1if.m1if03.dtos.PassagesDTO;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -21,17 +22,24 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static fr.univlyon1.m1if.m1if03.utils.ParseURI.parseUri;
+import static fr.univlyon1.m1if.m1if03.utils.ParseURI.*;
+import static fr.univlyon1.m1if.m1if03.utils.RequestBodyReading.*;
+import static fr.univlyon1.m1if.m1if03.utils.JsonUtils.*;
 
 public class PassagesController extends HttpServlet {
 
     GestionPassages passages;
+    Map<String, Salle> salles;
+    Map<String, User> users;
     String splitter = "passages";
 
     @Override
+    @SuppressWarnings("unchecked")
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         passages = (GestionPassages) config.getServletContext().getAttribute("passages");
+        salles = (Map<String, Salle>) config.getServletContext().getAttribute("salles");
+        users = (Map<String, User>) config.getServletContext().getAttribute("users");
     }
 
     @Override
@@ -293,78 +301,244 @@ public class PassagesController extends HttpServlet {
                 }
             }
         }
-        requestDispatcherAdmin(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> uri = parseUri(req.getRequestURI(), "passages");
-        HttpSession session = req.getSession(true);
-        User user = (User) session.getAttribute("user");
 
         if (uri.size() == 0){
-            /**
-             * Ajoute un nouveau passage
-             * Code 201: Passagé crée (location: URL du passage crée)
-             * Code 400: Paramètres de requête non acceptables
-             * Code 401: Utilisateur non authentifié
-             */
 
-            if (req.getHeader("accept").contains("application/json")){
-                //PassageDTO passageDTO = (PassageDTO) readJsonData(req, PassageDTO.class);
-
-
-            } else if (req.getHeader("accept").contains("text/html")){
-                String nomSalle = req.getParameter("nomSalle");
-
-                if (nomSalle == null) {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Salle non spécifiée.");
-                    return;
-                }
-
-                Salle salle = ((Map<String, Salle>) req.getServletContext().getAttribute("salles")).get(nomSalle);
-
-                if (salle == null) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "La salle n'existe pas.");
-                    return;
-                }
-
-                if (req.getParameter("action").equals("Entrer")) {
-                    Passage p = new Passage(user, salle, new Date());
-                    passages.add(p);
-                    salle.incPresent();
-                } else if (req.getParameter("action").equals("Sortir")) {
-                    List<Passage> passTemp = passages.getPassagesByUserAndSalle(user, salle);
-                    for (Passage p : passTemp) { // On mémorise une sortie de tous les passages existants et sans sortie
-                        if (p.getSortie() == null) {
-                            p.setSortie(new Date());
-                            salle.decPresent();
-                        }
-                    }
-                } else {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action invalide.");
-                    return;
-                }
-            }
-
-
-
-
-
-
-
+            //Crée un nouveau passage
+            createPassage(req, resp);
 
         }
     }
 
-    private void requestDispatcher(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/jsp/interface.jsp")
-                .include(req, resp);
+
+    /***********************************************************/
+    /********************  PRIVATE FUNCTIONS  ******************/
+    /***********************************************************/
+
+    /**
+     * Liste tout les passages existants.
+     * @param req requête.
+     * @param resp réponse.
+     * @throws IOException exception.
+     */
+    private void getAllPassages(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        PassagesDTO passagesDTO = new PassagesDTO(passages.getAllPassages(),
+                sourceURI(req.getRequestURL().toString(), splitter));
+
+        printJsonValues(resp, passagesDTO);
+
+        resp.setStatus(200);
+
     }
 
-    private void requestDispatcherAdmin(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/jsp/interface_admin.jsp")
-                .include(req, resp);
+    /**
+     * Crée un nouveau passage.
+     * @param req requête.
+     * @param resp réponse.
+     */
+    private void createPassage(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        PassageDTO passageDTO = readJson(req, PassageDTO.class);
+
+        //On vérifie si toutes les infos (excepté pour la date) ne sont pas vides
+        if (passageDTO.getUser().isEmpty() || passageDTO.getSalle().isEmpty()
+                || (passageDTO.getDateEntree().isEmpty() && passageDTO.getDateSortie().isEmpty())){
+            resp.sendError(400, "Paramètres de requête non acceptables");
+            return;
+        }
+
+        //On vérifie si l'utilisateur spécifié existe
+
+
     }
 
+    /**
+     * Récupère un passage.
+     * @param req requête.
+     * @param resp réponse.
+     * @param id id du passage.
+     * @throws IOException exception.
+     */
+    private void getPassage(HttpServletRequest req, HttpServletResponse resp, int id) throws IOException {
+        if (passages.getPassageById(id) == null){
+            resp.sendError(404, "Passage non trouvé");
+            return;
+        }
+
+        PassageDTO passageDTO = new PassageDTO(passages.getPassageById(id));
+
+        writeJson(resp, passageDTO);
+
+        resp.setStatus(200);
+    }
+
+    /**
+     * Liste tout les passages d'un utilisateur.
+     * @param req requête.
+     * @param resp réponse.
+     * @param userLogin login de l'utilisateur.
+     * @throws IOException exception.
+     */
+    private void getPassagesByUser(HttpServletRequest req, HttpServletResponse resp, String userLogin) throws IOException {
+        if (!users.containsKey(userLogin)){
+            resp.sendError(404, "Utilisateur non trouvé");
+            return;
+        }
+
+        PassagesDTO passagesDTO = new PassagesDTO(
+                passages.getPassagesByUser(users.get(userLogin)),
+                sourceURI(req.getRequestURL().toString(), splitter));
+
+        printJsonValues(resp, passagesDTO);
+
+        resp.setStatus(200);
+    }
+
+    /**
+     * Liste tout les passages d'une salle
+     * @param req requête.
+     * @param resp réponse.
+     * @param roomName nom de la salle.
+     * @throws IOException exception.
+     */
+    private void getPassagesBySalle(HttpServletRequest req, HttpServletResponse resp, String roomName) throws IOException {
+        if (!salles.containsKey(roomName)){
+            resp.sendError(404, "Salle non trouvée");
+            return;
+        }
+
+        PassagesDTO passagesDTO = new PassagesDTO(
+                passages.getPassagesBySalle(salles.get(roomName)),
+                sourceURI(req.getRequestURL().toString(), splitter));
+
+        printJsonValues(resp, passagesDTO);
+
+        resp.setStatus(200);
+    }
+
+    /**
+     * Liste tout les passages en cours d'un utilisateur.
+     * @param req requête.
+     * @param resp réponse.
+     * @param userLogin login de l'utilisateur.
+     * @throws IOException exception.
+     */
+    private void getPassagesByUserEnCours(HttpServletRequest req, HttpServletResponse resp, String userLogin) throws IOException {
+        if (!users.containsKey(userLogin)){
+            resp.sendError(404, "Utilisateur non trouvé");
+            return;
+        }
+
+        PassagesDTO passagesDTO = new PassagesDTO(
+                passages.getPassagesByUserEncours(users.get(userLogin)),
+                sourceURI(req.getRequestURL().toString(), splitter));
+
+        printJsonValues(resp, passagesDTO);
+
+        resp.setStatus(200);
+    }
+
+    /**
+     * Liste tout les passages d'un utilisateur d'une date.
+     * @param req requête.
+     * @param resp réponse.
+     * @param userLogin login de l'utilisateur.
+     * @param dateEntree date d'entrée.
+     * @param dateSortie date de sortie.
+     * @throws IOException exception.
+     */
+    private void getPassagesByUserAndDates(HttpServletRequest req, HttpServletResponse resp, String userLogin, String dateEntree, String dateSortie) throws IOException {
+        if (!users.containsKey(userLogin)){
+            resp.sendError(404, "Utilisateur non trouvé");
+            return;
+        }
+
+        Date entree;
+        Date sortie;
+        try {
+            entree = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"))
+                    .parse(dateEntree);
+            sortie = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"))
+                    .parse(dateSortie);
+        } catch (ParseException e) {
+            resp.sendError(400, "Paramètres de la requête non acceptables");
+            return;
+        }
+
+        PassagesDTO passagesDTO = new PassagesDTO(
+                passages.getPassagesByUserAndDates(users.get(userLogin), entree, sortie),
+                sourceURI(req.getRequestURL().toString(), splitter));
+
+        printJsonValues(resp, passagesDTO);
+
+        resp.setStatus(200);
+    }
+
+    /**
+     * Liste tout les passages d'une salle d'une date.
+     * @param req requête.
+     * @param resp réponse.
+     * @param roomName nom de la salle.
+     * @param dateEntree date d'entrée.
+     * @param dateSortie date de sortie.
+     * @throws IOException exception.
+     */
+    private void getPassagesBySalleAndDates(HttpServletRequest req, HttpServletResponse resp, String roomName, String dateEntree, String dateSortie) throws IOException {
+        if (!salles.containsKey(roomName)){
+            resp.sendError(404, "Salle non trouvée");
+            return;
+        }
+
+        Date entree;
+        Date sortie;
+        try {
+            entree = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"))
+                    .parse(dateEntree);
+            sortie = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"))
+                    .parse(dateSortie);
+        } catch (ParseException e) {
+            resp.sendError(400, "Paramètres de la requête non acceptables");
+            return;
+        }
+
+        PassagesDTO passagesDTO = new PassagesDTO(
+                passages.getPassagesBySalleAndDates(salles.get(roomName), entree, sortie),
+                sourceURI(req.getRequestURL().toString(), splitter));
+
+        printJsonValues(resp, passagesDTO);
+
+        resp.setStatus(200);
+    }
+
+    /**
+     * Liste tout les passages d'un utilisateur et d'une salle.
+     * @param req requête.
+     * @param resp réponse.
+     * @param userLogin login de l'utilisateur.
+     * @param roomName nom de la salle.
+     * @throws IOException exception.
+     */
+    private void getPassagesByUserAndSalle(HttpServletRequest req, HttpServletResponse resp, String userLogin, String roomName) throws IOException {
+        if (!users.containsKey(userLogin)){
+            resp.sendError(404, "Utilisateur non trouvé");
+            return;
+        }
+
+        if (!salles.containsKey(roomName)){
+            resp.sendError(404, "Salle non trouvé");
+            return;
+        }
+
+        PassagesDTO passagesDTO = new PassagesDTO(
+                passages.getPassagesByUserAndSalle(users.get(userLogin), salles.get(roomName)),
+                sourceURI(req.getRequestURL().toString(), splitter));
+
+        printJsonValues(resp, passagesDTO);
+
+        resp.setStatus(200);
+    }
 }

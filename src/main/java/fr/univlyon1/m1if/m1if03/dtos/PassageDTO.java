@@ -1,9 +1,6 @@
 package fr.univlyon1.m1if.m1if03.dtos;
 
-import fr.univlyon1.m1if.m1if03.classes.User;
-
-import java.util.Date;
-import java.util.Objects;
+import fr.univlyon1.m1if.m1if03.classes.Passage;
 
 public class PassageDTO {
 
@@ -13,6 +10,13 @@ public class PassageDTO {
     private String dateSortie;
 
     public PassageDTO(){}
+
+    public PassageDTO(Passage passage){
+        this.user = passage.getUser().getLogin();
+        this.salle = passage.getSalle().getNom();
+        this.dateEntree = passage.getEntree().toString();
+        this.dateSortie = passage.getSortie().toString();
+    }
 
     public String getUser() {
         return user;
@@ -28,6 +32,22 @@ public class PassageDTO {
 
     public String getDateSortie() {
         return dateSortie;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setSalle(String salle) {
+        this.salle = salle;
+    }
+
+    public void setDateEntree(String dateEntree) {
+        this.dateEntree = dateEntree;
+    }
+
+    public void setDateSortie(String dateSortie) {
+        this.dateSortie = dateSortie;
     }
 
     @Override

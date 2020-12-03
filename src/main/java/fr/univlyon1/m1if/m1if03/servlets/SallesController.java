@@ -15,6 +15,7 @@ import java.io.*;
 import java.util.List;
 import java.util.Map;
 
+import static fr.univlyon1.m1if.m1if03.utils.JsonUtils.printJsonValues;
 import static fr.univlyon1.m1if.m1if03.utils.JsonUtils.writeJson;
 import static fr.univlyon1.m1if.m1if03.utils.RequestBodyReading.*;
 import static fr.univlyon1.m1if.m1if03.utils.ParseURI.*;
@@ -91,6 +92,10 @@ public class SallesController extends HttpServlet {
     }
 
 
+    /***********************************************************/
+    /********************  PRIVATE FUNCTIONS  ******************/
+    /***********************************************************/
+
     /**
      * Crée une nouvelle salle.
      * @param req requête.
@@ -130,11 +135,7 @@ public class SallesController extends HttpServlet {
         SallesDTO sallesDTO = new SallesDTO(salles.values(),
                 sourceURI(req.getRequestURL().toString(), splitter));
 
-        req.setAttribute("sallesDTO", sallesDTO);
-
-        PrintWriter out = resp.getWriter();
-        out.write(String.valueOf(sallesDTO));
-        out.close();
+        printJsonValues(resp, sallesDTO);
 
         resp.setStatus(200);
     }
@@ -152,8 +153,6 @@ public class SallesController extends HttpServlet {
         }
 
         SalleDTO salleDTO = new SalleDTO(salles.get(roomName));
-
-        req.setAttribute("salleDTO", salleDTO);
 
         writeJson(resp, salleDTO);
 
