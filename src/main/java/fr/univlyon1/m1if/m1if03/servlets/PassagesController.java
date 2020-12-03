@@ -49,256 +49,50 @@ public class PassagesController extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         if (uri.size() == 0){
-            /**
-             * Renvoie les URI de tous les passages
-             * Code 200: OK
-             * Code 401: Utilisateur non authentifié
-             * Code 403: Utilisateur non administrateur
-             */
-            if (req.getHeader("accept").contains("application/json")){
-                //JSON
-                PrintWriter out = resp.getWriter();
-                out.write("[\n");
-                for (Passage passage: passages.getAllPassages()){
-                    out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + passage.getId() + "\"\n");
-                }
-                out.write("]");
-                out.close();
 
-            } else if (req.getHeader("accept").contains("text/html")){
-                //HTML
-                req.setAttribute("passages", passages.getAllPassages());
-            }
-            resp.setStatus(200);
+            //Liste de tout les passages
+            getAllPassages(req, resp);
 
         } else if (uri.size() == 1){
-            /**
-             * Renvoie la représentation d'un passage
-             * Code 200: OK
-             * Code 401: Utilisateur non authentifié
-             * Code 403: Utilisateur non administrateur
-             * Code 404: Passage non trouvé
-             */
-            Passage passage = passages.getPassageById(Integer.parseInt(uri.get(0)));
-            if (passage == null){
-                resp.sendError(404, "Passage non trouvé.");
-                return;
-            }
 
-            if (req.getHeader("accept").contains("application/json")) {
-                //JSON
-                PrintWriter out = resp.getWriter();
-                //out.write(writeJsonData(passage));
-                out.close();
-            } else if (req.getHeader("accept").contains("text/html")){
-                req.setAttribute("passages", passage);
-                req.setAttribute("page", "passage");
-            }
-            resp.setStatus(200);
+            //Renvoie un passage
+            getPassage(req, resp, Integer.parseInt(uri.get(0)));
 
         } else if (uri.size() == 2){
             if (uri.get(0).equals("byUser")){
-                /**
-                 * Renvoie les URI des passages de l'utilisateur indiqué
-                 * Code 200: OK
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 * Code 404: Passage non trouvé
-                 */
-                List<Passage> passagesList = passages.getPassagesByUser(new User(uri.get(1)));
-                if (passagesList == null){
-                    resp.sendError(404, "Aucun passage provenant de l'utilisateur");
-                    return;
-                }
 
-                if (req.getHeader("accept").contains("application/json")){
-                    //JSON
-                    PrintWriter out = resp.getWriter();
-                    out.write("[\n");
-                    for (Passage passage: passagesList){
-                        out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + passage.getId() + "\"\n");
-                    }
-                    out.write("]");
-                    out.close();
-
-                } else if (req.getHeader("accept").contains("text/html")){
-                    //HTML
-                    req.setAttribute("passages", passagesList);
-                    req.setAttribute("page", "passages");
-                }
-                resp.setStatus(200);
+                //Liste tout les passages d'un utilisateur
+                getPassagesByUser(req, resp, uri.get(1));
 
             } else if (uri.get(0).equals("bySalle")){
-                /**
-                 * Renvoie les URI des passages d'une salle indiquée
-                 * Code 200: OK
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 * Code 404: Passage non trouvé
-                 */
-                List<Passage> passagesList = passages.getPassagesBySalle(new Salle(uri.get(1)));
-                if (passagesList == null){
-                    resp.sendError(404, "Aucun passage provenant de la salle");
-                    return;
-                }
 
-                if (req.getHeader("accept").contains("application/json")){
-                    //JSON
-                    PrintWriter out = resp.getWriter();
-                    out.write("[\n");
-                    for (Passage passage: passagesList){
-                        out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + passage.getId() + "\"\n");
-                    }
-                    out.write("]");
-                    out.close();
-
-                } else if (req.getHeader("accept").contains("text/html")){
-                    //HTML
-                    req.setAttribute("passages", passagesList);
-                    req.setAttribute("page", "passages");
-                }
-                resp.setStatus(200);
+                //Liste tout les passages d'une salle
+                getPassagesBySalle(req, resp, uri.get(1));
 
             }
         } else if (uri.size() == 3){
             if (uri.get(0).equals("byUser") && uri.get(2).equals("enCours")){
-                /**
-                 * Renvoie les URI des passages de l'utilisateur indiqué sans date de sortie
-                 * Code 200: OK
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 * Code 404: Passage non trouvé
-                 */
-                List<Passage> passagesList = passages.getPassagesByUserEncours(new User(uri.get(1)));
-                if (passagesList == null){
-                    resp.sendError(404, "Aucun passage provenant de l'utilisateur");
-                    return;
-                }
 
-                if (req.getHeader("accept").contains("application/json")){
-                    //JSON
-                    PrintWriter out = resp.getWriter();
-                    out.write("[\n");
-                    for (Passage passage: passagesList){
-                        out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + passage.getId() + "\"\n");
-                    }
-                    out.write("]");
-                    out.close();
-
-                } else if (req.getHeader("accept").contains("text/html")){
-                    //HTML
-                    req.setAttribute("passages", passagesList);
-                    req.setAttribute("page", "passages");
-                }
-                resp.setStatus(200);
+                //Liste tout les passages en cours d'un utilisateur
+                getPassagesByUserEnCours(req, resp, uri.get(1));
 
             } else if (uri.get(0).equals("byUserAndSalle")){
-                /**
-                 * Renvoie les URI des passages de l'utilisateur et d'une salle indiqués
-                 * Code 200: OK
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 * Code 404: Passage non trouvé
-                 */
-                List<Passage> passagesList = passages.getPassagesByUserAndSalle(new User(uri.get(1)), new Salle(uri.get(2)));
-                if (passagesList == null){
-                    resp.sendError(404, "Aucun passage provenant de l'utilisateur et de la salle");
-                    return;
-                }
 
-                if (req.getHeader("accept").contains("application/json")){
-                    //JSON
-                    PrintWriter out = resp.getWriter();
-                    out.write("[\n");
-                    for (Passage passage: passagesList){
-                        out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + passage.getId() + "\"\n");
-                    }
-                    out.write("]");
-                    out.close();
-
-                } else if (req.getHeader("accept").contains("text/html")){
-                    //HTML
-                    req.setAttribute("passages", passagesList);
-                    req.setAttribute("page", "passages");
-                }
-                resp.setStatus(200);
+                //Liste tout les passages d'un utilisateur et d'une salle
+                getPassagesByUserAndSalle(req, resp, uri.get(1), uri.get(2));
 
             }
         } else if (uri.size() == 4){
             if (uri.get(0).equals("byUserAndDates")){
-                /**
-                 * Renvoie les URI des passages de l'utilisateur et dates indiqués
-                 * Code 200: OK
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 * Code 404: Passage non trouvé
-                 */
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"));
-                    Date dateEntree = sdf.parse(uri.get(2));
-                    Date dateSortie = sdf.parse(uri.get(3));
 
-                    List<Passage> passagesList = passages.getPassagesByUserAndDates(new User(uri.get(1)), dateEntree, dateSortie);
-
-                    req.setAttribute("passages", passagesList);
-
-                    if (req.getHeader("accept").contains("application/json")){
-                        //JSON
-                        PrintWriter out = resp.getWriter();
-                        out.write("[\n");
-                        for (Passage passage: passagesList){
-                            out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + passage.getId() + "\"\n");
-                        }
-                        out.write("]");
-                        out.close();
-
-                    } else if (req.getHeader("accept").contains("text/html")){
-                        //HTML
-                        req.setAttribute("passages", passagesList);
-                        req.setAttribute("page", "passages");
-                    }
-                    resp.setStatus(200);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    resp.sendError(404, "Passage non trouvé");
-                }
+                //Liste tout les passages d'un utilisateur et d'une date
+                getPassagesByUserAndDates(req, resp, uri.get(1), uri.get(2), uri.get(3));
 
             } else if (uri.get(0).equals("bySalleAndDates")){
-                /**
-                 * Renvoie les URI des passages d'une salle et dates indiqués
-                 * Code 200: OK
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 * Code 404: Passage non trouvé
-                 */
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"));
-                    Date dateEntree = sdf.parse(uri.get(2));
-                    Date dateSortie = sdf.parse(uri.get(3));
 
-                    List<Passage> passagesList = passages.getPassagesBySalleAndDates(new Salle(uri.get(1)), dateEntree, dateSortie);
-                    req.setAttribute("passages", passagesList);
+                //Liste tout les passages d'une salle et d'une date
+                getPassagesBySalleAndDates(req, resp, uri.get(1), uri.get(2), uri.get(3));
 
-                    if (req.getHeader("accept").contains("application/json")){
-                        //JSON
-                        PrintWriter out = resp.getWriter();
-                        out.write("[\n");
-                        for (Passage passage: passagesList){
-                            out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + passage.getId() + "\"\n");
-                        }
-                        out.write("]");
-                        out.close();
-
-                    } else if (req.getHeader("accept").contains("text/html")){
-                        //HTML
-                        req.setAttribute("passages", passagesList);
-                        req.setAttribute("page", "passages");
-                    }
-                    resp.setStatus(200);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    resp.sendError(404, "Passage non trouvé");
-                }
             }
         }
     }
@@ -351,7 +145,63 @@ public class PassagesController extends HttpServlet {
             return;
         }
 
-        //On vérifie si l'utilisateur spécifié existe
+        //On vérifie si l'utilisateur spécifié dans la requête correspond à celui stocké dans le token
+        String userLogin = passageDTO.getUser();
+        String userToken = parseUri((String) req.getAttribute("token"), "users").get(0);
+        System.out.println("User login: " + userLogin);
+        System.out.println("User token: " + userToken);
+
+        User user = users.get(userLogin);
+        if (user == null || !user.getLogin().equals(userToken)) {
+            resp.sendError(400, "Paramètres de requête non acceptables");
+            return;
+        }
+
+        String roomName = passageDTO.getSalle();
+        Salle salle = salles.get(roomName);
+        if (salle == null) {
+            resp.sendError(400, "Paramètres de requête non acceptables");
+            return;
+        }
+
+        Date dateEntree;
+        Date dateSortie;
+        try {
+            dateEntree = passageDTO.getDateEntree() != null ?
+                    new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us")).parse(passageDTO.getDateEntree())
+                    : null;
+            dateSortie = passageDTO.getDateSortie() != null ?
+                    new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us")).parse(passageDTO.getDateSortie())
+                    : null;
+        } catch (ParseException e) {
+            resp.sendError(400, "Paramètres de la requête non acceptables");
+            return;
+        }
+
+        Passage passage = null;
+        if (dateEntree != null && dateSortie == null) {
+            passage = new Passage(user, salle, dateEntree);
+            salle.incPresent();
+            passages.add(passage);
+        } else if (dateSortie != null) {
+            List<Passage> passTemp = passages.getPassagesByUserAndSalle(user, salle);
+            for (Passage p : passTemp) { // On mémorise une sortie de tous les passages existants et sans sortie
+                if (p.getSortie() == null) {
+                    passage = p;
+                    passage.setSortie(dateSortie);
+                    salle.decPresent();
+                }
+            }
+        }
+
+        if (passage != null) {
+            resp.setStatus(201);
+            String location = sourceURI(req.getRequestURL().toString(), splitter) + "/passages/" + passage.getId();
+            resp.setHeader("Location", location);
+        } else {
+            resp.sendError(400, "Paramètres de la requête non acceptables");
+            return;
+        }
 
 
     }

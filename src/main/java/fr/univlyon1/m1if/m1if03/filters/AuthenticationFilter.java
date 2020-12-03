@@ -1,5 +1,6 @@
 package fr.univlyon1.m1if.m1if03.filters;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import fr.univlyon1.m1if.m1if03.classes.User;
 
 import javax.servlet.FilterChain;
@@ -17,67 +18,63 @@ import java.util.Map;
 
 import static fr.univlyon1.m1if.m1if03.utils.ParseURI.parseUri;
 import static fr.univlyon1.m1if.m1if03.utils.ParseURI.sourceURI;
+import static fr.univlyon1.m1if.m1if03.utils.PresenceUcblJwtHelper.verifyToken;
 
 @WebFilter(filterName = "AuthenticationFilter")
 public class AuthenticationFilter extends HttpFilter {
 
-    Map<String, User> users;
     private String whitelist;
 
     @SuppressWarnings("unchecked")
     public void init(FilterConfig config) throws ServletException {
         super.init(config);
-        this.users = (Map<String, User>) config.getServletContext().getAttribute("users");
         this.whitelist = config.getInitParameter("whitelist");
     }
 
     public void doFilter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws ServletException, IOException {
 
-        // Test d'une requête d'authentification
         List<String> urls = parseUri(req.getRequestURI(), "users");
-        if (urls.size() == 1) {
-            String url = urls.get(0);
-            if (!whitelist.equals(url)) {
+        System.out.println(resp.getHeaderNames());
 
-                if (req.getSession(true).getAttribute("user") == null) {
-                    resp.sendError(401, "Error | User not logged.");
+        if (urls != null){
+            if (urls.size() == 1) {
+                String url = urls.get(0);
+                if (!whitelist.equals(url)) {
+
+                    //Vérif: l'utilisateur est authentifié
+                    try {
+                        String token = req.getHeader("Authorization").replace("Bearer ", "");
+                        req.setAttribute("token", verifyToken(token, req));
+                    } catch (NullPointerException | JWTVerificationException e) {
+                        resp.sendError(401, "Utilisateur non authentifié");
+                        return;
+                    }
+
+                }
+            } else {
+
+                //Vérif: l'utilisateur est authentifié
+                try {
+                    String token = req.getHeader("Authorization").replace("Bearer ", "");
+                    req.setAttribute("token", verifyToken(token, req));
+                } catch (NullPointerException | JWTVerificationException e) {
+                    resp.sendError(401, "Utilisateur non authentifié");
                     return;
                 }
 
             }
         } else {
-
-            if (req.getSession(true).getAttribute("user") == null) {
-                resp.sendError(401, "Error | User not logged.");
-                return;
-            }
-
-        }
-            /*
-            if(req.getMethod().equals("POST")) {
-                if(req.getParameter("action") != null && req.getParameter("action").equals("Connexion")
-                        && req.getParameter("login") != null && !req.getParameter("login").equals("")) {
-                    User user = new User(req.getParameter("login"));
-                    user.setNom(req.getParameter("nom"));
-                    user.setAdmin(req.getParameter("admin") != null && req.getParameter("admin").equals("on"));
-
-                    // On ajoute l'user à la session
-                    HttpSession session = req.getSession(true);
-                    session.setAttribute("user", user);
-                    // On rajoute l'user dans le DAO
-
-                    users.put(req.getParameter("login"), user);
-                } else {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                    return;
-                }
-            } else {
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            //Vérif: l'utilisateur est authentifié
+            try {
+                String token = req.getHeader("Authorization").replace("Bearer ", "");
+                req.setAttribute("token", verifyToken(token, req));
+            } catch (NullPointerException | JWTVerificationException e) {
+                resp.sendError(401, "Utilisateur non authentifié");
                 return;
             }
         }
 
-        */
         chain.doFilter(req, resp);
     }
+
 }

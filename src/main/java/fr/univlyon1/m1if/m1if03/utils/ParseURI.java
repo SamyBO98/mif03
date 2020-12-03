@@ -28,6 +28,10 @@ public class ParseURI {
             }
         }
 
+        if (!wordVisited){
+            return null;
+        }
+
         return res;
     }
 

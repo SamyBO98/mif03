@@ -15,7 +15,6 @@
     <url-pattern>/index.jsp</url-pattern>
   </filter-mapping>
 
-  <!--
   <filter>
     <filter-name>Authentication</filter-name>
     <filter-class>fr.univlyon1.m1if.m1if03.filters.AuthenticationFilter</filter-class>
@@ -33,7 +32,6 @@
     <url-pattern>/salles</url-pattern>
     <url-pattern>/salles/*</url-pattern>
   </filter-mapping>
-  -->
 
   <filter>
     <filter-name>Authorization</filter-name>
@@ -41,7 +39,12 @@
   </filter>
   <filter-mapping>
     <filter-name>Authorization</filter-name>
-    <url-pattern>/admin</url-pattern>
+    <url-pattern>/users</url-pattern>
+    <url-pattern>/users/*</url-pattern>
+    <url-pattern>/passages</url-pattern>
+    <url-pattern>/passages/*</url-pattern>
+    <url-pattern>/salles</url-pattern>
+    <url-pattern>/salles/*</url-pattern>
   </filter-mapping>
 
   <filter>

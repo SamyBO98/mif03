@@ -200,9 +200,10 @@ public class UsersController extends HttpServlet {
 
         //Génération d'un token
         String location = sourceURI(req.getRequestURL().toString(),
-                splitter);
+                splitter) + "/users/" + user.getLogin();
 
         String authorization = generateToken(location, user.getAdmin(), req);
+        System.out.println(authorization);
         resp.setHeader("Authorization", "Bearer " + authorization);
         resp.setHeader("Location", location);
         resp.setStatus(204);
@@ -215,6 +216,8 @@ public class UsersController extends HttpServlet {
      * @param resp réponse.
      */
     private void logoutUser(HttpServletRequest req, HttpServletResponse resp){
+        resp.setHeader("Authorization", null);
+        req.removeAttribute("token");
         resp.setStatus(204);
     }
 
