@@ -7,24 +7,12 @@ import java.util.Objects;
 
 public class PassageDTO {
 
-    private static int id;
-
     private String user;
     private String salle;
     private String dateEntree;
     private String dateSortie;
 
-    private static int getCounter() {
-        return ++id;
-    }
-
-    public PassageDTO() {
-        this.id = getCounter();
-    }
-
-    public int getId() {
-        return id;
-    }
+    public PassageDTO(){}
 
     public String getUser() {
         return user;
@@ -34,11 +22,11 @@ public class PassageDTO {
         return salle;
     }
 
-    public String getEntree() {
+    public String getDateEntree() {
         return dateEntree;
     }
 
-    public String getSortie() {
+    public String getDateSortie() {
         return dateSortie;
     }
 

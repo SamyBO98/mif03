@@ -11,6 +11,8 @@ public class SalleDTO {
     private int presents;
     private boolean saturee;
 
+    public SalleDTO(){}
+
     public SalleDTO(Salle salle){
         this.nomSalle = salle.getNom();
         this.capacite = salle.getCapacite();

@@ -4,6 +4,8 @@ public class SalleIdDTO {
 
     private String nomSalle;
 
+    public SalleIdDTO(){}
+
     public String getNomSalle() {
         return nomSalle;
     }
@@ -11,4 +13,5 @@ public class SalleIdDTO {
     public void setNomSalle(String nomSalle) {
         this.nomSalle = nomSalle;
     }
+
 }

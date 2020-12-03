@@ -1,6 +1,9 @@
 package fr.univlyon1.m1if.m1if03.servlets;
 
 import fr.univlyon1.m1if.m1if03.classes.User;
+import fr.univlyon1.m1if.m1if03.dtos.NomUserDTO;
+import fr.univlyon1.m1if.m1if03.dtos.UserDTO;
+import fr.univlyon1.m1if.m1if03.dtos.UsersDTO;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -14,7 +17,10 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
-import static fr.univlyon1.m1if.m1if03.utils.ParseURI.parseUri;
+import static fr.univlyon1.m1if.m1if03.utils.ParseURI.*;
+import static fr.univlyon1.m1if.m1if03.utils.RequestBodyReading.*;
+import static fr.univlyon1.m1if.m1if03.utils.JsonUtils.*;
+import static fr.univlyon1.m1if.m1if03.utils.PresenceUcblJwtHelper.*;
 
 @WebServlet(name = "UsersController", urlPatterns = {"/users", "/users/*"})
 public class UsersController extends HttpServlet {
@@ -32,80 +38,23 @@ public class UsersController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<String> uri = parseUri(req.getRequestURI(), "users");
-        HttpSession session = req.getSession(true);
-        User user = (User) session.getAttribute("user");
 
         if (uri.size() == 0){
-            /**
-             * Renvoie les URI de tous les utilisateurs
-             * Code 200: OK
-             * Code 401: Utilisateur non authentifié
-             * Code 403: Utilisateur non administrateur
-             */
 
-            if (req.getHeader("accept").contains("application/json")){
-                //JSON
-                PrintWriter out = resp.getWriter();
-                out.write("[\n");
-                for (Map.Entry<String, User> userName: users.entrySet()){
-                    out.write("\"http://localhost:8080" + req.getRequestURI() + "/" + userName.getValue().getLogin() + "\"\n");
-                }
-                out.write("]");
-                out.close();
+            //Liste tout les utilisateurs existants
+            getAllUsers(req, resp);
 
-            } else if (req.getHeader("accept").contains("text/html")){
-                //HTML
-                req.setAttribute("page", "users");
-                requestDispatcherAdmin(req, resp);
-            }
-            resp.setStatus(200);
         } else if (uri.size() == 1){
-            /**
-             * Renvoie la représentation d'un utilisateur
-             * Code 200: OK
-             * Code 401: Utilisateur non authentifié
-             * Code 403: Utilisateur non administrateur
-             * Code 404: Utilisateur non trouvé
-             */
-            User u = users.get(uri.get(0));
-            if (u == null){
-                resp.sendError(404, "Utilisateur non trouvé");
-                return;
-            }
 
-            if (req.getHeader("accept").contains("application/json")){
-                //JSON
-                PrintWriter out = resp.getWriter();
-                out.write("{\n");
-                out.write("\"login\": \"" + u.getLogin() + "\",\n");
-                out.write("\"nom\": \"" + u.getNom() + "\",\n");
-                out.write("\"admin\": \"" + (u.getAdmin() ? "true": "false") + "\"\n");
-                out.write("}");
-                out.close();
-
-            } else if (req.getHeader("accept").contains("text/html")){
-                //HTML
-                req.setAttribute("user", u);
-                req.setAttribute("page", "user");
-                requestDispatcherAdmin(req, resp);
-            }
-
-            resp.setStatus(200);
+            //Récupère un utilisateur en particulier
+            getUser(req, resp, uri.get(0));
 
         } else if (uri.size() == 2){
             if (uri.get(1).equals("passages")){
-                /**
-                 * Renvoie les URI de tous les utilisateurs
-                 * Code 303 Redirection vers l'URL de la liste des passages d'un utilisateur
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 */
-            }
-            if (!user.getAdmin()){
-                resp.sendError(403, "Utilisateur non administrateur");
-                return;
-            } else {
-                // Redirection 303
+
+                //Redirige l'utilisateur vers la liste de passages d'un utilisateur
+                redirectPassagesUser(req, resp, uri.get(0));
+
             }
         }
     }
@@ -116,35 +65,15 @@ public class UsersController extends HttpServlet {
 
         if (uri.size() == 1){
             if (uri.get(0).equals("login")){
-                /**
-                 * Connecte l'utilisateur (à l'aide d'un token JWT)
-                 * Code 204: OK
-                 * Code 400: Paramètres de requête non acceptables
-                 */
-                if (req.getParameter("action") != null && req.getParameter("action").equals("Connexion")
-                        && req.getParameter("login") != null && !req.getParameter("login").equals("")
-                        && req.getSession(true).getAttribute("user") == null){
-                    User user = new User(req.getParameter("login"));
-                    user.setNom(req.getParameter("nom"));
-                    user.setAdmin(req.getParameter("admin") != null && req.getParameter("admin").equals("on"));
 
-                    // On ajoute l'user à la session
-                    HttpSession session = req.getSession(true);
-                    session.setAttribute("user", user);
-                    // On rajoute l'user dans le DAO
+                //Connecte l'utilisateur
+                loginUser(req, resp);
 
-                    users.put(req.getParameter("login"), user);
-                }
             } else if (uri.get(0).equals("logout")){
-                /**
-                 * Déconnecte l'utilisateur
-                 * Code 204: OK
-                 * Code 401: Utilisateur non authentifié
-                 */
-                if (req.getSession(true).getAttribute("user") != null){
-                    req.getSession().invalidate();
-                    resp.sendRedirect("./");
-                }
+
+                //Déconnecte l'utilisateur
+                logoutUser(req, resp);
+
             }
         }
     }
@@ -155,27 +84,139 @@ public class UsersController extends HttpServlet {
 
         if (uri.size() == 2){
             if (uri.get(1).equals("nom")){
-                /**
-                 * Met à jour le nom de l'utilisateur
-                 * Code 204: OK
-                 * Code 400: Paramètres de requête non acceptables
-                 * Code 401: Utilisateur non authentifié
-                 * Code 403: Utilisateur non administrateur
-                 * Code 404: Utilisateur non trouvé
-                 */
+
+                //Met à jour le nom de l'utilisateur
+                updateUserName(req, resp, uri.get(0));
+
             }
         }
     }
 
+    /**
+     * Liste tout les utilisateurs existants.
+     * @param req requête.
+     * @param resp réponse.
+     * @throws IOException exception.
+     */
+    private void getAllUsers(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        UsersDTO usersDTO = new UsersDTO(users.values(),
+                sourceURI(req.getRequestURL().toString(), splitter));
 
+        req.setAttribute("usersDTO", usersDTO);
 
-    private void requestDispatcher(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/jsp/interface.jsp")
-                .include(req, resp);
+        PrintWriter out = resp.getWriter();
+        out.write(String.valueOf(usersDTO));
+        out.close();
+
+        resp.setStatus(200);
     }
 
-    private void requestDispatcherAdmin(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/jsp/interface_admin.jsp")
-                .include(req, resp);
+    /**
+     * Retourne les informations sur un utilisateur.
+     * @param req requête.
+     * @param resp réponse.
+     * @param userLogin login de l'utilisateur.
+     * @throws IOException exception.
+     */
+    private void getUser(HttpServletRequest req, HttpServletResponse resp, String userLogin) throws IOException {
+        if (!users.containsKey(userLogin)){
+            resp.sendError(404, "Utilisateur non trouvé");
+            return;
+        }
+
+        UserDTO userDTO = new UserDTO(users.get(userLogin));
+        req.setAttribute("userDTO", userDTO);
+
+        writeJson(resp, userDTO);
+        resp.setStatus(200);
     }
+
+    /**
+     * Met à jour le nom de l'utilisateur.
+     * @param req requête.
+     * @param resp réponse.
+     * @param userLogin login de l'utilisateur.
+     * @throws IOException exception.
+     */
+    private void updateUserName(HttpServletRequest req, HttpServletResponse resp, String userLogin) throws IOException {
+        if (!users.containsKey(userLogin)){
+            resp.sendError(404, "Utilisateur non trouvé");
+            return;
+        }
+
+        NomUserDTO nomUserDTO = readingBodyRequest(req, NomUserDTO.class);
+
+        if (nomUserDTO.getNom().isEmpty()){
+            resp.sendError(400, "Paramètres de requête non acceptables");
+            return;
+        }
+
+        users.get(userLogin).setNom(nomUserDTO.getNom());
+
+        resp.setStatus(204);
+
+    }
+
+    /**
+     * Redirection vers la liste des passages de l'utilisateur indiqué.
+     * @param req requête.
+     * @param resp réponse.
+     * @param userLogin login de l'utilisateur.
+     */
+    private void redirectPassagesUser(HttpServletRequest req, HttpServletResponse resp, String userLogin){
+        resp.setStatus(303);
+        String location = sourceURI(req.getRequestURL().toString(),
+                splitter + "/passages/byUser/" + userLogin);
+        resp.setHeader("Location", location);
+    }
+
+    /**
+     * Authentifie l'utilisateur en générant un token.
+     * @param req requête.
+     * @param resp réponse.
+     * @throws IOException exception.
+     */
+    private void loginUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        UserDTO userDTO = readingBodyRequest(req, UserDTO.class);
+
+        if (userDTO.getLogin().isEmpty()){
+            resp.sendError(400, "Paramètres de requête non acceptables");
+            return;
+        }
+
+        User user;
+
+        if (users.containsKey(userDTO.getLogin())){
+            //L'utilisateur existe déja
+            user = users.get(userDTO.getLogin());
+        } else {
+            //L'utilisateur n'existe pas, on l'ajoute
+            user = new User(userDTO.getLogin());
+            if (!userDTO.getNom().isEmpty())
+                user.setNom(userDTO.getNom());
+            user.setAdmin(userDTO.getAdmin());
+
+            users.put(userDTO.getLogin(), user);
+        }
+
+        //Génération d'un token
+        String location = sourceURI(req.getRequestURL().toString(),
+                splitter);
+
+        String authorization = generateToken(location, user.getAdmin(), req);
+        resp.setHeader("Authorization", "Bearer " + authorization);
+        resp.setHeader("Location", location);
+        resp.setStatus(204);
+
+    }
+
+    /**
+     * Déconnecte l'utilisateur.
+     * @param req requête.
+     * @param resp réponse.
+     */
+    private void logoutUser(HttpServletRequest req, HttpServletResponse resp){
+        resp.setStatus(204);
+    }
+
 }
