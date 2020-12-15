@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<title>Présence UCBL</title>
+	<meta charset="UTF-8">
+	<style>
+		.active { display: block; }
+		.inactive { display: none; }
+	</style>
+	<script src="https://unpkg.com/mustache@latest"></script>
+	<!-- local javascript files -->
+	<script src="js/ajax.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script>
+		function show(hash) {
+			$('.active').removeClass('active').addClass('inactive');
+			$(hash).removeClass('inactive').addClass('active');
+		}
+	</script>
+</head>
+<body>
+<h1>Présence UCBL (en AJAX) !</h1>
+<div id="errMsg"></div>
+
+<aside>
+	<h2>Menu</h2>
+	<ul>
+		<li><a href='#index'>Accueil</a></li>
+		<li><a href='#monCompte'>Mon compte</a></li>
+		<li><a href='#entree'>Entrée</a></li>
+		<li><a href='#sortie'>Sortie</a></li>
+		<li><a href='#passages'>Tous mes passages</a></li>
+		<li><a href='#deco'>Déconnexion</a></li>
+	</ul>
+</aside>
+
+<section id='index' class='active'>
+	<h2>Bienvenue sur Présence UCBL</h2>
+	<p>Entrez votre login :
+		<input type="text" name="login" id="login">
+		<input type="text" name="nom" id="nom">
+
+		<button type="button" onclick="login()">Se connecter</button>
+	</p>
+	<!--
+        A vous de modifier cette section pour qu'elle affiche les passages en cours quand l'utilisateur est connecté, et qu'elle se recharge toutes les 5 secondes...
+        <p>Vous êtes actuellement dans les salles :</p>
+        <ul>
+            <li>...</li>
+        </ul>
+    -->
+</section>
+
+
+
+
+<!-----------------------------------------------------------------------------
+---<< AFFICHAGE DU COMPTE + MISE A JOUR DU NOM DU COMPTE
+------------------------------------------------------------------------------>
+<section id='monCompte' class='inactive'>
+	<h2>Mon compte</h2>
+	<h3 id='monCompteAffichage'></h3>
+	<script id='monCompteTemplate' type='x-tmpl-mustache'>
+		<ul id='compteList'>
+			<li>Login : <span id="monCompteLogin">{{ login }}</span></li>
+			<li>Nom : <span id="monCompteNom">{{ nom }}</span></li>
+			<li>Admin : <span id="monCompteAdmin">{{ admin }}</span></li>
+		</ul>
+		<p>Modifier mon nom :
+			<input type="text" name="nom" id="nomUpdate">
+			<button type="button" onclick="updateNom()">Modifier</button>
+		</p>
+		<p><a href='#deco'>Déconnexion</a></p>
+    </script>
+</section>
+
+
+<!-----------------------------------------------------------------------------
+---<< ENTREE D'UNE SALLE
+------------------------------------------------------------------------------>
+<section id='entree' class='inactive'>
+	<h2>Entrer dans une salle</h2>
+	<p>Entrer dans la salle :
+		<input type="text" name="salle" id="entreeSalle">
+		<button type="button" onclick="updatePassage('entree')">Entrer dans la salle</button>
+	</p>
+	<p><a href='#deco'>Se déconnecter</a></p>
+</section>
+
+
+<!-----------------------------------------------------------------------------
+---<< SORTIE D'UNE SALLE
+------------------------------------------------------------------------------>
+<section id='sortie' class='inactive'>
+	<h2>Sortir d'une salle</h2>
+	<p>Sortir de la salle :
+		<input type="text" name="salle" id="sortieSalle">
+		<button type="button" onclick="updatePassage('sortie')">Entrer dans la salle</button>
+	</p>
+	<p><a href="#deco">Se déconnecter</a></p>
+</section>
+
+
+<!-----------------------------------------------------------------------------
+---<< AFFICHAGE DES PASSAGES
+------------------------------------------------------------------------------>
+<section id='passages' class='inactive'>
+	<h2>Liste des passages</h2>
+
+	<button type="button" onclick="getPassages('all')">Tout les passages existants</button>
+	<button type="button" onclick="getPassages('encours')">Mes passages en cours</button>
+	<button type="button" onclick="getPassages('user')">Tout mes passages</button>
+
+	<ul id='passagesAffichage'>
+
+	</ul>
+	<script id='passagesTemplate' type='x-tmpl-mustache'>
+    	<a href="#passages" onclick="getPassages({{ . }})">
+    		Passage {{ . }}
+    	</a>
+    </script>
+	<script id='passageTemplate' type='x-tmpl-mustache'>
+    	<h3>Utilisateur {{ user }}</h3><br/>
+    	<h3>Salle {{ salle }}</h3><br/>
+    	<h4>Date d'arrivée en salle: {{ dateEntree }}<br/>
+    	{{ #dateSortie }}
+		<h4>Date de départ en salle: {{ dateSortie }}<br/>
+		{{ /dateSortie }}
+    </script>
+	<p><a href='#deco'>Déconnexion</a></p>
+</section>
+
+<section id='deco' class='inactive'>
+	<h2>Déconnexion</h2>
+	<form method="post" action="Deco">
+		<p>Cliquez ici pour vous déconnecter :
+			<input type="submit" value="Deconnexion">
+		</p>
+	</form>
+	<p><a href='#index'>Retour à la page d'accueil</a></p>
+</section>
+
+<!-- MUSTACHE -->
+<script>
+	window.addEventListener('hashchange', () => {
+		show(window.location.hash);
+		//Cette fonction récupère la valeur du hash et appelle une certaine fonction selon ce qu'on a en valeur
+		filterHash(window.location.hash);
+	});
+</script>
+</body>
+</html>
