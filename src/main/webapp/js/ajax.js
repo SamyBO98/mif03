@@ -13,14 +13,14 @@ function filterHash(hash){
 			updateViewIndex();
 			break;
 		case '#monCompte':
-			affichage('compte', 'monCompteAffichage', 'monCompteTemplate', true);
+			affichage('compte', 'monCompteAffichage', 'monCompteTemplate', true, 'notifCompte');
 			break;
 		case '#entree':
 			break;
 		case '#sortie':
 			break;
 		case '#passages':
-			affichage('user', 'passagesAffichage', 'passagesTemplate', false);
+			affichage('user', 'passagesAffichage', 'passagesTemplate', false, 'notifPassages');
 			break;
 		case '#deco':
 			break;
@@ -37,25 +37,29 @@ function updateViewIndex(){
 	if (loginName !== null && token !== null){
 		$("#indexLogged").removeClass('inactive').addClass('active');
 		$("#indexLogin").removeClass('active').addClass('inactive');
+		document.getElementById("indexText").innerHTML = "Bienvenue " + loginName + "!";
 
-		affichage('encours', 'indexPassagesAffichage', 'indexPassagesTemplate', false);
+		affichage('encours', 'indexPassagesAffichage', 'indexPassagesTemplate', false, 'notifPassagesEnCours');
 	} else {
 		$("#indexLogged").removeClass('active').addClass('inactive');
 		$("#indexLogin").removeClass('inactive').addClass('active');
+		document.getElementById("indexText").innerHTML = "Connexion à Présence UCBL";
 	}
 }
 
 /**
  * Connecte l'utilisateur.
  */
-function login() {
+function login(notificationDiv) {
+
+	notificateInProcess(notificationDiv);
+	document.getElementById(notificationDiv).innerHTML = 'Connexion en cours...';
 
 	let myData = {
 		login: $("#login").val(),
 		nom: $("#nom").val(),
 		admin: true
 	};
-
 
 	let myInit = { method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -70,12 +74,11 @@ function login() {
 		.then((resp) => {
 			token = resp.headers.get("Authorization");
 			loginName = $("#login").val();
-			window.location.assign("#index");
-			$("#login").val("");
-			$("#nom").val("");
+			window.location.assign("#logged");
+			removeAlert(notificationDiv);
 		})
 		.catch((error) => {
-			document.getElementById("errMsg").innerHTML = "Erreur lors de la connection: " + error;
+			sendErrorMessage(notificationDiv, error);
 		});
 
 }
@@ -83,13 +86,16 @@ function login() {
 /**
  * Déconnecte l'utilisateur.
  */
-function logout(){
+function logout(notificationDiv){
+
+	notificateInProcess(notificationDiv);
+	document.getElementById(notificationDiv).innerHTML = 'Déconnexion en cours...';
+
 	let myData = {
 		login: $("#login").val(),
 		nom: $("#nom").val(),
 		admin: true
 	};
-
 
 	let myInit = { method: 'POST',
 		headers: { 'Accept': '*/*', 'Authorization': token },
@@ -105,18 +111,20 @@ function logout(){
 			token = null;
 			loginName = null;
 			window.location.assign("#index");
+			removeAlert(notificationDiv);
 		})
 		.catch((error) => {
-			document.getElementById("errMsg").innerHTML = "Erreur lors de la déconnexion: " + error;
+			sendErrorMessage(notificationDiv, error);
 		});
 }
 
 /**
  * Met à jour le nom de l'utilisateur connecté.
  */
-function updateNom(){
+function updateNom(notificationDiv){
 
-	document.getElementById("monCompteNom").innerHTML = 'Mise à jour du nom en cours...';
+	notificateInProcess(notificationDiv);
+	document.getElementById(notificationDiv).innerHTML = 'Mise à jour du nom en cours...';
 
 	let jsonData = {
 		nom: $("#nomUpdate").val()
@@ -132,25 +140,29 @@ function updateNom(){
 	let myRequest = new Request(url + "users/" + loginName);
 
 	fetch(myRequest,myInit)
-		.then(resp => {
+		.then(() => {
 			document.getElementById('monCompteNom').innerHTML = $("#nomUpdate").val();
-			$("#nomUpdate").val("");
+			removeAlert(notificationDiv);
 		})
 		.catch((error) => {
-			document.getElementById('monCompteAffichage').innerHTML = "Une erreur s'est produite: " + error;
+			sendErrorMessage(notificationDiv, error);
 		});
 }
 
 /**
  * Permet l'ajout d'un passage.
  * @param entreeOuSortie un booléen permettant de savoir s'il s'agit d'une entrée ou d'une sortie.
+ * @param notificationDiv
  */
-function updatePassage(entreeOuSortie){
+function updatePassage(entreeOuSortie, notificationDiv){
 	//S'il s'agit d'une entrée alors on vérifie s'il y a un passage en cours (si oui on update la date) sinon on ajoute le passage
 	//Sinon on doit récupérer le passage en cours existant et ajoutons une sortie associée. Si le passage n'existe pas alors on a un souci
 	let textSalle;
 	let jsonData;
 	let myInit;
+
+	notificateInProcess(notificationDiv);
+	document.getElementById(notificationDiv).innerHTML = 'Enregistrement de votre passage en cours...';
 
 	if (entreeOuSortie === 'entree'){
 		textSalle = $("#entreeSalle").val();
@@ -164,6 +176,7 @@ function updatePassage(entreeOuSortie){
 			cache: 'default',
 			body: JSON.stringify(jsonData)
 		};
+
 	} else {
 		textSalle = $("#sortieSalle").val();
 		jsonData = "user=" + loginName + "&salle=" + textSalle + "&dateSortie=now";
@@ -175,19 +188,33 @@ function updatePassage(entreeOuSortie){
 		};
 	}
 
-
-
 	let myRequest = new Request(url + "passages");
 
 	fetch(myRequest,myInit)
-		.then((resp) => {
-			$("#" + textSalle).val("");
+		.then(() => {
+			removeAlert(notificationDiv);
 			window.location.assign("#passages");
 		})
 		.catch((error) => {
-			document.getElementById("errMsg").innerHTML = "Erreur lors de l'ajout d'un passage: " + error;
+			sendErrorMessage(notificationDiv, error);
 		});
 
+}
+
+/**
+ * Lance une notification à l'utilisateur que sa requête est en cours de traitement.
+ * @param notificationDiv element de notification à afficher.
+ */
+function notificateInProcess(notificationDiv){
+	let div = $("#" + notificationDiv);
+	div.removeClass('alert').removeClass('alert-warning').removeClass('alert-danger');
+	div.addClass('alert').addClass('alert-warning');
+}
+
+function removeAlert(notificationDiv){
+	let div = $("#" + notificationDiv);
+	div.removeClass('alert').removeClass('alert-warning').removeClass('alert-danger');
+	document.getElementById(notificationDiv).innerHTML = null;
 }
 
 /**
@@ -195,34 +222,37 @@ function updatePassage(entreeOuSortie){
  * @param filtre.
  * @param affichageDiv l'élement pour l'affichage des données récupérées.
  * @param templateDiv l'élément qui contient le squelette pour l'affichage des données.
+ * @param affichageUneLigne booléen permettant de savoir s'il s'agit d'un affichage multiple ou d'un simple affichage détaillé.
+ * @param notificationDiv élément de notification pour annoncer au client qu'on traite sa requête.
  */
-function affichage(filtre, affichageDiv, templateDiv, affichageUneLigne){
-	document.getElementById(affichageDiv).innerHTML = 'Chargement en cours...';
+function affichage(filtre, affichageDiv, templateDiv, affichageUneLigne, notificationDiv){
+
+	notificateInProcess(notificationDiv);
+
 	let newUrl = url;
 	let textAffichage;
 
 	switch (filtre) {
 		case 'user':
 			newUrl += "passages/byUser/" + loginName;
-			textAffichage = "Affichage des passages par l'utilisateur " + loginName;
+			textAffichage = "Affichage des passages par l'utilisateur " + loginName + " en cours...";
 			break;
 		case 'encours':
 			newUrl += "passages/byUser/" + loginName + '/enCours';
-			textAffichage = "Affichage des passages par l'utilisateur " + loginName + " en cours";
+			textAffichage = "Affichage des passages par l'utilisateur " + loginName + " en cours...";
 			break;
 		case 'compte':
 			newUrl += "users/" + loginName;
-			textAffichage = "Informations sur votre compte";
+			textAffichage = "Récupération des informations sur votre compte en cours...";
 			break;
 		case 'salle':
-			newUrl += "salles/" + $("#indexSalleId").val();
-			textAffichage = "Informations sur la salle " + $("#indexSalleId").val();
+			let content = $("#indexSalleId").val();
+			newUrl += "salles/" + content;
+			textAffichage = "Informations sur la salle " + content + " en cours...";
 			break;
-		default:
-			textAffichage = "Erreur interne: Mauvaise utilisation de la foncion d'affichages...";
-			document.getElementById(affichageDiv).innerHTML = textAffichage;
-			return;
 	}
+
+	document.getElementById(notificationDiv).innerHTML = textAffichage;
 
 	let myInit = { method: 'GET',
 		headers: { 'Authorization': token, 'Accept': 'application/json' },
@@ -235,22 +265,53 @@ function affichage(filtre, affichageDiv, templateDiv, affichageUneLigne){
 	fetch(myRequest,myInit)
 		.then(resp => resp.json())
 		.then(data => {
-			var res = textAffichage + "<br/>";
-			var templ = document.getElementById(templateDiv).innerHTML;
+			let res;
+			let templ = document.getElementById(templateDiv).innerHTML;
 
 			if (data.length === 0){
-				res += "Aucun résultat retourné";
+				res = "<h4>Aucun résultat en retour</h4>";
 			} else if (affichageUneLigne === true){
-				res += Mustache.render(templ, data);
+				res = Mustache.render(templ, data);
 			} else {
-				for (var i = 0; i < data.length; i++){
-					res += "<li>" + Mustache.render(templ, data[i].replace("passages/", "")) + "</li>";
+				res = "";
+				for (let i = 0; i < data.length; i++){
+					res += "<li class='list-group-item text-dark bg-light'>" + Mustache.render(templ, data[i].replace("passages/", "")) + "</li>";
 				}
 			}
 
 			document.getElementById(affichageDiv).innerHTML = res;
+			removeAlert(notificationDiv);
+
 		})
 		.catch((error) => {
-			document.getElementById(affichageDiv).innerHTML = "Une erreur s'est produite: " + error;
+			document.getElementById(affichageDiv).innerHTML = null;
+			sendErrorMessage(notificationDiv, error);
 		});
 }
+
+/**
+ * Fonction utilisant jquery permettant l'affichage de sections (et la disparition d'autres).
+ * @param hash.
+ */
+function show(hash) {
+	$('.active').removeClass('active').addClass('inactive');
+	$(hash).removeClass('inactive').addClass('active');
+}
+
+/**
+ * Envoie sur la page statique un message d'erreur qu'il va afficher à l'utilisateur.
+ * @param affichageDiv element ou le message va s'afficher.
+ * @param error l'erreur en question.
+ */
+function sendErrorMessage(notificationDiv, error){
+	$("#" + notificationDiv).removeClass('alert-warning').addClass('alert-danger');
+	document.getElementById(notificationDiv).innerHTML = "Nous venons de rencontrer une erreur: "
+		+ error
+		+ ".";
+}
+
+window.addEventListener('hashchange', () => {
+	show(window.location.hash);
+	//Cette fonction récupère la valeur du hash et appelle une certaine fonction selon ce qu'on a en valeur
+	filterHash(window.location.hash);
+});
