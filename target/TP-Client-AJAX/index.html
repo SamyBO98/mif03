@@ -29,26 +29,56 @@
 		<li><a href='#monCompte'>Mon compte</a></li>
 		<li><a href='#entree'>Entrée</a></li>
 		<li><a href='#sortie'>Sortie</a></li>
-		<li><a href='#passages'>Tous mes passages</a></li>
+		<li><a href='#passages'>Mes passages</a></li>
 		<li><a href='#deco'>Déconnexion</a></li>
 	</ul>
 </aside>
 
 <section id='index' class='active'>
-	<h2>Bienvenue sur Présence UCBL</h2>
-	<p>Entrez votre login :
+    <div class="active" id="indexLogin">
+
+        <h2>Connection sur Présence UCBL</h2>
+
 		<input type="text" name="login" id="login">
 		<input type="text" name="nom" id="nom">
-
 		<button type="button" onclick="login()">Se connecter</button>
-	</p>
-	<!--
-        A vous de modifier cette section pour qu'elle affiche les passages en cours quand l'utilisateur est connecté, et qu'elle se recharge toutes les 5 secondes...
-        <p>Vous êtes actuellement dans les salles :</p>
-        <ul>
-            <li>...</li>
-        </ul>
-    -->
+
+    </div>
+
+    <!-- Si l'utilisateur est conecté, on affiche ses passages en cours -->
+    <!-- De plus on rajoute un formulaire permettant de récupérer les informations d'une salle -->
+    <div class='inactive' id="indexLogged">
+        <div id="indexPassages">
+
+            <h2>Vos passages en cours</h2>
+
+            <ul id="indexPassagesAffichage"></ul>
+            <script id="indexPassagesTemplate" type='x-tmpl-mustache'>
+                Passage {{ . }}
+            </script>
+
+        </div>
+
+        <div id="indexSalle">
+
+            <h2>Rechercher une salle</h2>
+
+            <div id="indexSalleAffichage"></div>
+            <script id="indexSalleTemplate" type="x-tmpl-mustache">
+                Salle {{ nomSalle }}<br/>
+                Sa capacité est de {{ capacite }} personnes<br/>
+                Il y a {{ presents }} personnes actuellement dans la salle<br/>
+                Saturation: {{ saturee }}
+            </script>
+
+			<input type="text" id="indexSalleId">
+			<button type="button" onclick="affichage('salle', 'indexSalleAffichage', 'indexSalleTemplate', true)">
+				Rechercher la salle
+			</button>
+
+        </div>
+    </div>
+
 </section>
 
 
@@ -58,7 +88,9 @@
 ---<< AFFICHAGE DU COMPTE + MISE A JOUR DU NOM DU COMPTE
 ------------------------------------------------------------------------------>
 <section id='monCompte' class='inactive'>
+
 	<h2>Mon compte</h2>
+
 	<h3 id='monCompteAffichage'></h3>
 	<script id='monCompteTemplate' type='x-tmpl-mustache'>
 		<ul id='compteList'>
@@ -66,12 +98,13 @@
 			<li>Nom : <span id="monCompteNom">{{ nom }}</span></li>
 			<li>Admin : <span id="monCompteAdmin">{{ admin }}</span></li>
 		</ul>
-		<p>Modifier mon nom :
-			<input type="text" name="nom" id="nomUpdate">
-			<button type="button" onclick="updateNom()">Modifier</button>
-		</p>
-		<p><a href='#deco'>Déconnexion</a></p>
     </script>
+
+	<h2>Modifier le nom</h2>
+
+	<input type="text" name="nom" id="nomUpdate">
+	<button type="button" onclick="updateNom()">Modifier</button>
+
 </section>
 
 
@@ -79,12 +112,12 @@
 ---<< ENTREE D'UNE SALLE
 ------------------------------------------------------------------------------>
 <section id='entree' class='inactive'>
-	<h2>Entrer dans une salle</h2>
-	<p>Entrer dans la salle :
-		<input type="text" name="salle" id="entreeSalle">
-		<button type="button" onclick="updatePassage('entree')">Entrer dans la salle</button>
-	</p>
-	<p><a href='#deco'>Se déconnecter</a></p>
+
+	<h2>Entrée dans une salle</h2>
+
+	<input type="text" name="salle" id="entreeSalle">
+	<button type="button" onclick="updatePassage('entree')">Entrer dans la salle</button>
+
 </section>
 
 
@@ -92,12 +125,12 @@
 ---<< SORTIE D'UNE SALLE
 ------------------------------------------------------------------------------>
 <section id='sortie' class='inactive'>
+
 	<h2>Sortir d'une salle</h2>
-	<p>Sortir de la salle :
-		<input type="text" name="salle" id="sortieSalle">
-		<button type="button" onclick="updatePassage('sortie')">Entrer dans la salle</button>
-	</p>
-	<p><a href="#deco">Se déconnecter</a></p>
+
+	<input type="text" name="salle" id="sortieSalle">
+	<button type="button" onclick="updatePassage('sortie')">Sortir de la salle</button>
+
 </section>
 
 
@@ -105,39 +138,23 @@
 ---<< AFFICHAGE DES PASSAGES
 ------------------------------------------------------------------------------>
 <section id='passages' class='inactive'>
-	<h2>Liste des passages</h2>
 
-	<button type="button" onclick="getPassages('all')">Tout les passages existants</button>
-	<button type="button" onclick="getPassages('encours')">Mes passages en cours</button>
-	<button type="button" onclick="getPassages('user')">Tout mes passages</button>
+	<h2>Mes passages</h2>
 
-	<ul id='passagesAffichage'>
-
-	</ul>
+	<ul id='passagesAffichage'></ul>
 	<script id='passagesTemplate' type='x-tmpl-mustache'>
-    	<a href="#passages" onclick="getPassages({{ . }})">
-    		Passage {{ . }}
-    	</a>
+    	Passage {{ . }}
     </script>
-	<script id='passageTemplate' type='x-tmpl-mustache'>
-    	<h3>Utilisateur {{ user }}</h3><br/>
-    	<h3>Salle {{ salle }}</h3><br/>
-    	<h4>Date d'arrivée en salle: {{ dateEntree }}<br/>
-    	{{ #dateSortie }}
-		<h4>Date de départ en salle: {{ dateSortie }}<br/>
-		{{ /dateSortie }}
-    </script>
-	<p><a href='#deco'>Déconnexion</a></p>
+
 </section>
 
 <section id='deco' class='inactive'>
+
 	<h2>Déconnexion</h2>
-	<form method="post" action="Deco">
-		<p>Cliquez ici pour vous déconnecter :
-			<input type="submit" value="Deconnexion">
-		</p>
-	</form>
-	<p><a href='#index'>Retour à la page d'accueil</a></p>
+
+	<h3>Cliquez sur le bouton pour vous déconnecter</h3>
+	<button type="button" onclick="logout()">Déconnexion</button>
+
 </section>
 
 <!-- MUSTACHE -->

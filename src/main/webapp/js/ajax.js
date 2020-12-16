@@ -3,7 +3,51 @@ let token = null;
 let loginName = null;
 
 
-// Function to log the user into the API
+/**
+ * Fonction de filtre permettant d'appeler d'autres fonctions en fonction du hash indiqué dans l'URL.
+ * @param hash
+ */
+function filterHash(hash){
+	switch (hash) {
+		case '#index':
+			updateViewIndex();
+			break;
+		case '#monCompte':
+			affichage('compte', 'monCompteAffichage', 'monCompteTemplate', true);
+			break;
+		case '#entree':
+			break;
+		case '#sortie':
+			break;
+		case '#passages':
+			affichage('user', 'passagesAffichage', 'passagesTemplate', false);
+			break;
+		case '#deco':
+			break;
+		default:
+			window.location.assign("#index");
+			break;
+	}
+}
+
+/**
+ * Fonction de mise à jour de la page #index.
+ */
+function updateViewIndex(){
+	if (loginName !== null && token !== null){
+		$("#indexLogged").removeClass('inactive').addClass('active');
+		$("#indexLogin").removeClass('active').addClass('inactive');
+
+		affichage('encours', 'indexPassagesAffichage', 'indexPassagesTemplate', false);
+	} else {
+		$("#indexLogged").removeClass('active').addClass('inactive');
+		$("#indexLogin").removeClass('inactive').addClass('active');
+	}
+}
+
+/**
+ * Connecte l'utilisateur.
+ */
 function login() {
 
 	let myData = {
@@ -26,7 +70,7 @@ function login() {
 		.then((resp) => {
 			token = resp.headers.get("Authorization");
 			loginName = $("#login").val();
-			window.location.assign("#monCompte");
+			window.location.assign("#index");
 			$("#login").val("");
 			$("#nom").val("");
 		})
@@ -36,55 +80,40 @@ function login() {
 
 }
 
-function filterHash(hash){
-	switch (hash) {
-		case '#index':
-			break;
-		case '#monCompte':
-			chargeCompte();
-			break;
-		case '#entree':
-			break;
-		case '#sortie':
-			break;
-		case '#passages':
-			getPassages('user');
-			break;
-		case '#deco':
-			break;
-		default:
-			window.location.assign("#index");
-			break;
-	}
-}
-
-function chargeCompte(){
-
-	document.getElementById("monCompteAffichage").innerHTML = 'En cours de chargement...';
-
-	let myInit = { method: 'GET',
-		headers: { 'Authorization': token, 'Accept': 'application/json' },
-		mode: 'cors',
-		cache: 'default'
+/**
+ * Déconnecte l'utilisateur.
+ */
+function logout(){
+	let myData = {
+		login: $("#login").val(),
+		nom: $("#nom").val(),
+		admin: true
 	};
 
-	let myRequest = new Request(url + "users/" + loginName);
+
+	let myInit = { method: 'POST',
+		headers: { 'Accept': '*/*', 'Authorization': token },
+		mode: 'cors',
+		cache: 'default',
+		body: JSON.stringify(myData)
+	};
+
+	let myRequest = new Request(url + "users/logout");
 
 	fetch(myRequest,myInit)
-		.then(resp => resp.json())
-		.then(data => {
-			var templ = document.getElementById('monCompteTemplate').innerHTML;
-			var res = "";
-
-			res += Mustache.render(templ, data);
-
-			document.getElementById('monCompteAffichage').innerHTML = res;
+		.then((resp) => {
+			token = null;
+			loginName = null;
+			window.location.assign("#index");
 		})
 		.catch((error) => {
-			document.getElementById('monCompteAffichage').innerHTML = "Une erreur s'est produite: " + error;
+			document.getElementById("errMsg").innerHTML = "Erreur lors de la déconnexion: " + error;
 		});
 }
 
+/**
+ * Met à jour le nom de l'utilisateur connecté.
+ */
 function updateNom(){
 
 	document.getElementById("monCompteNom").innerHTML = 'Mise à jour du nom en cours...';
@@ -112,6 +141,10 @@ function updateNom(){
 		});
 }
 
+/**
+ * Permet l'ajout d'un passage.
+ * @param entreeOuSortie un booléen permettant de savoir s'il s'agit d'une entrée ou d'une sortie.
+ */
 function updatePassage(entreeOuSortie){
 	//S'il s'agit d'une entrée alors on vérifie s'il y a un passage en cours (si oui on update la date) sinon on ajoute le passage
 	//Sinon on doit récupérer le passage en cours existant et ajoutons une sortie associée. Si le passage n'existe pas alors on a un souci
@@ -157,11 +190,16 @@ function updatePassage(entreeOuSortie){
 
 }
 
-function getPassages(filtre){
-	document.getElementById("passagesAffichage").innerHTML = 'Chargement des passages...';
+/**
+ * Affichage des vues (liste des passages selon un utilisateur).
+ * @param filtre.
+ * @param affichageDiv l'élement pour l'affichage des données récupérées.
+ * @param templateDiv l'élément qui contient le squelette pour l'affichage des données.
+ */
+function affichage(filtre, affichageDiv, templateDiv, affichageUneLigne){
+	document.getElementById(affichageDiv).innerHTML = 'Chargement en cours...';
 	let newUrl = url;
 	let textAffichage;
-	let isUniquePassage = false;
 
 	switch (filtre) {
 		case 'user':
@@ -172,15 +210,18 @@ function getPassages(filtre){
 			newUrl += "passages/byUser/" + loginName + '/enCours';
 			textAffichage = "Affichage des passages par l'utilisateur " + loginName + " en cours";
 			break;
-		case 'all':
-			newUrl += "passages";
-			textAffichage = "Affichage de tout les passages existants";
+		case 'compte':
+			newUrl += "users/" + loginName;
+			textAffichage = "Informations sur votre compte";
+			break;
+		case 'salle':
+			newUrl += "salles/" + $("#indexSalleId").val();
+			textAffichage = "Informations sur la salle " + $("#indexSalleId").val();
 			break;
 		default:
-			newUrl += "passages/" + filtre;
-			textAffichage = "Affichage du passage " + filtre;
-			isUniquePassage = true;
-			break;
+			textAffichage = "Erreur interne: Mauvaise utilisation de la foncion d'affichages...";
+			document.getElementById(affichageDiv).innerHTML = textAffichage;
+			return;
 	}
 
 	let myInit = { method: 'GET',
@@ -195,22 +236,21 @@ function getPassages(filtre){
 		.then(resp => resp.json())
 		.then(data => {
 			var res = textAffichage + "<br/>";
+			var templ = document.getElementById(templateDiv).innerHTML;
 
 			if (data.length === 0){
-				res += "Aucun passage actuellement";
-			} else if (isUniquePassage === true){
-				var templ = document.getElementById('passageTemplate').innerHTML;
+				res += "Aucun résultat retourné";
+			} else if (affichageUneLigne === true){
 				res += Mustache.render(templ, data);
 			} else {
 				for (var i = 0; i < data.length; i++){
-					var templ = document.getElementById('passagesTemplate').innerHTML;
 					res += "<li>" + Mustache.render(templ, data[i].replace("passages/", "")) + "</li>";
 				}
 			}
 
-			document.getElementById('passagesAffichage').innerHTML = res;
+			document.getElementById(affichageDiv).innerHTML = res;
 		})
 		.catch((error) => {
-			document.getElementById('passagesAffichage').innerHTML = "Une erreur s'est produite: " + error;
+			document.getElementById(affichageDiv).innerHTML = "Une erreur s'est produite: " + error;
 		});
 }
