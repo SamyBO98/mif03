@@ -16,11 +16,15 @@
 
 	<!-- mustache -->
 	<script src="https://unpkg.com/mustache@latest"></script>
+
+	<link rel="stylesheet" href="stylesheet/clock.css">
+
 	<!-- local javascript files -->
 	<script src="js/ajax.js"></script>
+	<script src="js/clock.js"></script>
 
 	</head>
-<body class="bg-light">
+<body class="bg-light" onload="setInterval(loadXMLAsynchroneously, 1000, 'get', './jsp/clock.jsp', null, 'timeDiv')">
 
 <nav class="navbar navbar-light bg-warning text-dark mb-5">
 	<div class="container-fluid">
@@ -87,9 +91,14 @@
 
 						<h3 id="notifPassagesEnCours"></h3>
 
-						<ul class="list-group list-group-flush" id="indexPassagesAffichage"></ul>
+						<div class="container">
+							<div class="row" id="indexPassagesAffichage"></div>
+						</div>
 						<script id="indexPassagesTemplate" type='x-tmpl-mustache'>
-							Passage {{ . }}
+							<h3>Passage {{ id }}</h3>
+							<h3>Utilisateur {{ user }}</h3>
+							<h3>Salle {{ salle }}<h3>
+							<h4>Entrée le {{ dateEntree }}</h4>
 						</script>
 
 					</div>
@@ -202,9 +211,15 @@
 
 				<h3 id="notifPassages"></h3>
 
-				<ul class="list-group list-group-flush" id='passagesAffichage'></ul>
+				<div class="container">
+					<div class="row" id='passagesAffichage'></div>
+				</div>
 				<script id='passagesTemplate' type='x-tmpl-mustache'>
-					Passage {{ . }}
+					<h3>Passage {{ id }}</h3>
+					<h3>Utilisateur {{ user }}</h3>
+					<h3>Salle {{ salle }}<h3>
+					<h4>Entrée le {{ dateEntree }}</h4>
+					<h4>Sortie le {{ dateSortie }}</h4>
 				</script>
 
 			</section>
@@ -224,6 +239,30 @@
 			</section>
 
 		</div>
+
+
+		<!-- Horloge -->
+		<aside class="col-lg-3 col-sm-12">
+
+			<h2 class="mb-3 mt-3 p-3 bg-dark text-warning">
+				Heure
+			</h2>
+
+			<h3 id="clockContent">Chargement en cours...</h3>
+
+			<article id="clock" class="clock inactive">
+				<div class="hours-container">
+					<div class="hours" id="hours"></div>
+				</div>
+				<div class="minutes-container">
+					<div class="minutes" id="minutes"></div>
+				</div>
+				<div class="seconds-container">
+					<div class="seconds" id="seconds"></div>
+				</div>
+			</article>
+
+		</aside>
 
 	</div>
 </div>

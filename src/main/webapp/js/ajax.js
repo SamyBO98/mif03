@@ -267,6 +267,7 @@ function affichage(filtre, affichageDiv, templateDiv, affichageUneLigne, notific
 		.then(data => {
 			let res;
 			let templ = document.getElementById(templateDiv).innerHTML;
+			document.getElementById(notificationDiv).innerHTML = null;
 
 			if (data.length === 0){
 				res = "<h4>Aucun résultat en retour</h4>";
@@ -274,13 +275,40 @@ function affichage(filtre, affichageDiv, templateDiv, affichageUneLigne, notific
 				res = Mustache.render(templ, data);
 			} else {
 				res = "";
+
 				for (let i = 0; i < data.length; i++){
-					res += "<li class='list-group-item text-dark bg-light'>" + Mustache.render(templ, data[i].replace("passages/", "")) + "</li>";
+
+					//Toutes les infos sur un passage
+					let id = data[i].substring(data[i].lastIndexOf("/"));
+					let urlPassage = new Request(url + "passages" + id);
+
+					fetch(urlPassage, myInit)
+						.then((respPassage) => {
+							return respPassage.json();
+						})
+						.then((dataPassage) => {
+							let jsonData = {
+								id: dataPassage.id,
+								user: dataPassage.user.split("/")[1],
+								salle: dataPassage.salle.split("/")[1],
+								dateEntree: dataPassage.dateEntree,
+								dateSortie: dataPassage.dateSortie
+							};
+
+							document.getElementById(affichageDiv).innerHTML +=
+								"<div class='p-2 col-lg-6 col-sm-12 border rounded shadow'>" + Mustache.render(templ, jsonData) + "</div>";
+						})
+						.catch((errorPassage) => {
+							document.getElementById(affichageDiv).innerHTML = null;
+							sendErrorMessage(notificationDiv, errorPassage);
+						});
 				}
 			}
 
-			document.getElementById(affichageDiv).innerHTML = res;
 			removeAlert(notificationDiv);
+			document.getElementById(affichageDiv).innerHTML = res;
+
+
 
 		})
 		.catch((error) => {
