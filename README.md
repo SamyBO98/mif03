@@ -1,3 +1,59 @@
-# Projet de base pour le TP AJAX M1IF03 #
+# Readme du TP7 (correspondant au code du TP5)
 
-Ce projet correspond à la [Première application du TP](https://liris.cnrs.fr/lionel.medini/enseignement/M1IF03/TP/TP_AJAX_jQuery.html#premiere_app).
+Nous avons au sommaire:
+- [Déploiement sur Tomcat](#déploiement-sur-tomcat)
+- [Déploiement sur Nginx](#déploiement-sur-nginx)
+- [Amélioration](#amélioration)
+
+
+## Déploiement sur Tomcat
+
+Voici les mesures prises lors du déploiement sur Tomcat.
+
+*Pour rappel: les différentes mesures sont les suivantes:*
+- *Le temps de chargement de la page HTML initiale*
+- *Le temps d'affichage de l'app shell*
+- *Le temps d'affichage du chemin critique de rendu (CRP)*
+
+##### Temps de chargement de la page HTML initiale
+
+Défini à XX secondes.
+
+##### Temps d'affichage de l'app shell
+
+Défini à XX secondes.
+
+##### Temps d'affichage du CRP
+
+Défini à XX secondes.
+
+
+## Déploiement sur Nginx
+
+Après déploiement sur Tomcat, il est nécessaire de les tester en faisant le déploiement sur Nginx.
+
+Nous aurons en plus une comparaison entre le déploiement sur Tomcat et celui sur Nginx.
+
+##### Temps de chargement de la page HTML initiale
+
+Défini à XX secondes.
+
+##### Temps d'affichage de l'app shell
+
+Défini à XX secondes.
+
+##### Temps d'affichage du CRP
+
+Défini à XX secondes.
+
+##### Comparaison
+
+*Un pourcentage négatif signifie que les performances lors du déploiement sur Tomcat sont meilleures que sur Nginx._*
+
+- Temps de chargement de la page HTML initiale: XX%
+- Temps d'affichage de l'app shell: XX%
+- Temps d'affichage du CRP: XX%
+
+## Amélioration
+
+A détailler un peu plus tard...
