@@ -36,19 +36,19 @@ Nous aurons en plus une comparaison entre le déploiement sur Tomcat et celui su
 
 ##### Temps de chargement de la page HTML initiale
 
-Défini à XX millisecondes.
+Défini à 423.006 millisecondes.
 
 ##### Temps d'affichage de l'app shell
 
-Défini à XX millisecondes.
+Défini à 647.609 millisecondes.
 
 ##### Temps d'affichage du CRP
 
-Défini à XX millisecondes.
+Défini à 998.00 millisecondes.
 
 ##### Comparaison
 
-*Un pourcentage négatif signifie que les performances lors du déploiement sur Tomcat sont meilleures que sur Nginx._*
+**Un pourcentage négatif signifie que les performances lors du déploiement sur Tomcat sont meilleures que sur Nginx.**
 
 - Temps de chargement de la page HTML initiale: XX%
 - Temps d'affichage de l'app shell: XX%
