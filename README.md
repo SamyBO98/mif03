@@ -21,11 +21,11 @@ Défini à 386.70 millisecondes.
 
 ##### Temps d'affichage de l'app shell
 
-Défini à 672.364 millisecondes.
+Défini à 1526.364 millisecondes.
 
 ##### Temps d'affichage du CRP
 
-Défini à 1275.70 millisecondes.
+Défini à 1895.70 millisecondes.
 
 
 ## Déploiement sur Nginx
@@ -36,24 +36,33 @@ Nous aurons en plus une comparaison entre le déploiement sur Tomcat et celui su
 
 ##### Temps de chargement de la page HTML initiale
 
-Défini à 423.006 millisecondes.
+Défini à 119.365 millisecondes.
 
 ##### Temps d'affichage de l'app shell
 
-Défini à 647.609 millisecondes.
+Défini à 969.609 millisecondes.
 
 ##### Temps d'affichage du CRP
 
-Défini à 998.00 millisecondes.
+Défini à 1253.240 millisecondes.
 
 ##### Comparaison
 
-**Un pourcentage négatif signifie que les performances lors du déploiement sur Tomcat sont meilleures que sur Nginx.**
+**Un gain signifie que les performances lors du déploiement sur Nginx sont meilleures que sur Tomcat.**
 
-- Temps de chargement de la page HTML initiale: XX%
-- Temps d'affichage de l'app shell: XX%
-- Temps d'affichage du CRP: XX%
+- Temps de chargement de la page HTML initiale: Gain de 70.14%
+- Temps d'affichage de l'app shell: Gain de 36.47%
+- Temps d'affichage du CRP: Gain de 33.90%
 
 ## Amélioration
 
-A détailler un peu plus tard...
+##### Utilisation d'attributs asynchrones
+
+Nous avons utilisé l'attribut **async** dans les fonctions suivantes faisant appel à l'API pour récupérer ou transmettre des données.
+
+Voici les temps notés:
+- Temps de chargement de la page HTML initiale: 80.35 millisecondes.
+- Temps d'affichage de l'app shell: 821.18 millisecondes.
+- Temps d'affichage du CRP: 994.09 millisecondes.
+
+On peut voir un **meilleur temps d'affichage du CRP** (*estimé à quasiment 1/4 du chargement initial*), une légère amélioration de l'app shell et de la page HTML initiale par rapport au déploiement de l'application sur Nginx sans améliorations.
