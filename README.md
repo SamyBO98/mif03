@@ -66,3 +66,14 @@ Voici les temps notés:
 - Temps d'affichage du CRP: 994.09 millisecondes.
 
 On peut voir un **meilleur temps d'affichage du CRP** (*estimé à quasiment 1/4 du chargement initial*), une légère amélioration de l'app shell et de la page HTML initiale par rapport au déploiement de l'application sur Nginx sans améliorations.
+
+##### Refactoring de l'application
+
+Dans les fichiers javascript, nous avons remplacé jQuery pour l'affichage de texte dans des balises HTML ainsi que pour l'appel à certains menus (par exemple si on clique dans "Mes passages", alors on a bien le menu des passages en cachant l'ancien menu sur lequel l'utilisateur était).
+
+Voici les temps notés:
+- Temps de chargement de la page HTML initiale: 110.64 millisecondes.
+- Temps d'affichage de l'app shell: 620.41 millisecondes.
+- Temps d'affichage du CRP: 958.22 millisecondes.
+
+On peut voir ici une **petite amélioration de l'affichage de l'app shell**. Rien de concret en ce qui concerne le CRP. Pour le chargement de la page HTML initiale, cette donnée stagne du au fait que la connexion au réseau peut fortement influer sur ces chiffres (*la connexion utilisée pour les tests n'est pas très stable ce qui peut donner à des chiffres un peu plus mauvais que ce qui est censé être...*)
